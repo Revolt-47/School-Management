@@ -4,6 +4,7 @@ const schoolSchema = new mongoose.Schema({
   branchName: {
     type: String,
     required: true,
+    unique: true,
   },
   numberOfStudents: {
     type: Number,
@@ -30,6 +31,7 @@ const schoolSchema = new mongoose.Schema({
   email : {
     type: String,
     required: true,
+    unique : true,
   },
   password : {
     type: String,

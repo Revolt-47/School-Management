@@ -2,9 +2,22 @@ const School = require('../models/SchoolModel'); // Adjust the path to your mode
 const bcrypt = require('bcrypt'); // For password hashing
 const nodemailer = require('nodemailer'); // For sending emails
 const crypto = require('crypto'); // For generating verification codes
+const cron = require('node-cron');
+const jwt = require('jsonwebtoken')
+
+
+
 
 async function registerSchool(req, res) {
   try {
+    // Check if the school already exists in the database by its email
+    const existingSchool = await School.findOne({ email: req.body.email });
+
+    if (existingSchool) {
+      // School is already registered, return its status
+      return res.status(200).json({ message: 'School already registered', status: existingSchool.status });
+    }
+
     // Create a new school instance based on the request data
     const newSchool = new School({
       branchName: req.body.branchName,
@@ -13,44 +26,56 @@ async function registerSchool(req, res) {
       username: req.body.address,
       city: req.body.city,
       numberOfGates: req.body.numberOfGates,
+      email: req.body.email,
       status: req.body.status || 'unverified', // Default to 'unverified' if status is not provided
     });
 
-    // Generate a random verification code
-    const verificationCode = crypto.randomBytes(6).toString('hex'); // 6-digit code
+    // Check if the password is present in the request body
+    if (!req.body.password) {
+      return res.status(400).json({ error: 'Password is required.' });
+    }
 
     // Encrypt the password before saving
     const saltRounds = 10; // Adjust the number of salt rounds as needed
-    const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-    newSchool.password = hashedPassword;
-    newSchool.verificationCode = verificationCode;
 
-    // Save the new school to the database
-    const savedSchool = await newSchool.save();
-
-    // Send the verification code to the school's email
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail', // e.g., 'Gmail'
-      auth: {
-        user: 'amirdaniyal47gmail.com',
-        pass: process.env.EMAILPW,
-      },
-    });
-
-    const mailOptions = {
-      from: 'amirdaniyal47@email.com',
-      to: req.body.email, // Assuming email is provided in the request body
-      subject: 'Verification Code for School Registration',
-      text: `Your verification code is: ${verificationCode}`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error(error);
-        res.status(500).json({ error: 'An error occurred while sending the verification code.' });
+    bcrypt.hash(req.body.password, saltRounds, async (err, hashedPassword) => {
+      if (err) {
+        console.error(err);
+        res.status(500).json({ error: 'An error occurred while hashing the password.' });
       } else {
-        console.log('Email sent: ' + info.response);
-        res.status(201).json(savedSchool);
+        newSchool.password = hashedPassword;
+
+        // Save the new school to the database
+        const savedSchool = await newSchool.save();
+
+        // Create a verification link with the school's ID
+        const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
+
+        // Send the verification link in the email
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: 'amirdaniyal47@gmail.com',
+            pass: 'zucq jdwo iqwp wttd',
+          },
+        });
+
+        const mailOptions = {
+          from: 'amirdaniyal47@email.com',
+          to: req.body.email, // Assuming email is provided in the request body
+          subject: 'Verification Link for School Registration',
+          text: `Click on the following link to verify your registration: ${verificationLink}`,
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ error: 'An error occurred while sending the verification link.' });
+          } else {
+            console.log('Email sent: ' + info.response);
+            res.status(201).json(verificationLink);
+          }
+        });
       }
     });
   } catch (err) {
@@ -59,10 +84,8 @@ async function registerSchool(req, res) {
   }
 }
 
-
-
- async function verifyEmail(req,res){
-  const { schoolId, verificationCode } = req.body;
+async function verifyEmail(req, res) {
+  const schoolId = req.params.schoolId; // Get school ID from request parameters
 
   try {
     const school = await School.findById(schoolId);
@@ -75,7 +98,7 @@ async function registerSchool(req, res) {
       return res.status(400).json({ error: 'School is already verified' });
     }
 
-    if (school.verificationCode !== verificationCode) {
+    if (school.code !== verificationCode) {
       return res.status(400).json({ error: 'Invalid verification code' });
     }
 
@@ -88,14 +111,14 @@ async function registerSchool(req, res) {
     console.error(err);
     res.status(500).json({ error: 'An error occurred while verifying the email' });
   }
-};
+}
 
-async function Login(req,res){
 
-  const { username, password } = req.body;
+async function Login(req, res) {
+  const { identifier, password } = req.body; // Use 'identifier' to accept either 'branchName' or 'email'
 
-  // Find the school by username
-  const school = School.find((s) => s.username === username);
+  // Find the school by either 'branchName' or 'email'
+  const school = School.find((s) => s.branchName === identifier || s.email === identifier);
 
   if (!school) {
     return res.status(404).json({ error: 'School not found' });
@@ -106,56 +129,13 @@ async function Login(req,res){
     return res.status(401).json({ error: 'Invalid password' });
   }
 
-  // Generate a random verification code
-  const verificationCode = crypto.randomBytes(6).toString('hex'); // 6-digit code
-
-  // Send the verification code to the school's email
-  const transporter = nodemailer.createTransport({
-    service: 'YourEmailService', // e.g., 'Gmail'
-    auth: {
-      user: 'your@email.com',
-      pass: 'yourpassword',
-    },
-  });
-
-  const mailOptions = {
-    from: 'your@email.com',
-    to: school.email,
-    subject: 'Verification Code for School Login',
-    text: `Your verification code is: ${verificationCode}`,
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error(error);
-      res.status(500).json({ error: 'An error occurred while sending the verification code.' });
-    } else {
-      console.log('Email sent: ' + info.response);
-      res.status(200).json({ message: 'Verification code sent to your email' });
-    }
-  });
-
-
+  // Generate a JWT token
+  const payload = { schoolId: school._id, username: school.branchName, email: school.email, role : 'school' };
+  const token = jwt.sign(payload,process.env.SECRET, { expiresIn: '72h' }); 
+  // Return the token along with a success message
+  res.status(200).json({ message: 'Login successful', token });
 }
 
-async function verify(req, res){
-  const { username, code } = req.body;
-
-  // Find the school by username
-  const school = School.find((s) => s.username === username);
-
-  if (!school) {
-    return res.status(404).json({ error: 'School not found' });
-  }
-
-  // Check if the entered code matches the generated code
-  if (code !== school.verificationCode) {
-    return res.status(401).json({ error: 'Invalid verification code' });
-  }
-
-  // If the code is correct, proceed with the login
-  return res.status(200).json({ message: 'School logged in successfully' });
-};
 
 async function changeSchoolStatusById(schoolId, newStatus) {
   try {
@@ -203,66 +183,64 @@ async function getSchoolsByStatus(status) {
   }
 }
 
-async function forgotPassword(req,res){
+async function forgotPassword(req, res) {
+  const { email } = req.body;
 
-  const { username } = req.body;
-
-  // Find the user by username or email
-  const school = await School.findOne({ $or: [{ username }, { email: username }] });
+  // Find the school by email
+  const school = await School.findOne({ email });
 
   if (!school) {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  // Generate a random reset code
-  const resetCode = crypto.randomBytes(6).toString('hex'); // 6-digit code
+  // Generate a unique reset token
+  const resetToken = crypto.randomBytes(16).toString('hex'); // You can adjust the token length
 
-  // Store the reset code and a timestamp in the user's profile
-  school.resetCode = resetCode;
-  school.resetCodeExpires = Date.now() + 36000; // Reset code expires in 6 minutes
+  // Calculate the expiration time for the reset link (10 minutes from now)
+  const expirationTime = Date.now() + 600000; // 10 minutes in milliseconds
 
-  await school.save();
-
-  // Send the reset code to the user's email
+  // Include the reset token and expiration time in the reset link
+  const resetLink = `http://localhost:3000/reset-password/${school._id}/${resetToken}/${expirationTime}`;
+  
+  // Send an email with the reset link
   const transporter = nodemailer.createTransport({
-    service: 'YourEmailService', // e.g., 'Gmail'
+    service: 'gmail', // e.g., 'Gmail'
     auth: {
       user: 'amirdaniyal47@email.com',
-      pass: process.env.PORT,
+      pass: process.env.EMAILPW,
     },
   });
 
   const mailOptions = {
     from: 'amirdaniyal47@email.com',
     to: school.email,
-    subject: 'Password Reset Code',
-    text: `Your password reset code is: ${resetCode}`,
+    subject: 'Password Reset Link',
+    text: `Click on the following link to reset your password: ${resetLink}`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error(error);
-      return res.status(500).json({ error: 'An error occurred while sending the reset code.' });
+      return res.status(500).json({ error: 'An error occurred while sending the reset link.' });
     }
 
-    res.status(200).json({ message: 'Password reset code sent to your email' });
+    res.status(200).json({ message: 'Password reset link sent to your email' });
   });
-
 }
 
-async function resetPassword(req,res){
-  const { username, resetCode, newPassword } = req.body;
-
-  // Find the user by username
-  const school = await School.findOne({ username });
+async function resetPassword(req, res) {
+  const { schoolId, resetToken, expirationTime, newPassword } = req.body;
+  
+  // Find the school by ID
+  const school = await School.findById(schoolId);
 
   if (!school) {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  // Check if the reset code and timestamp are valid
-  if (school.resetCode !== resetCode || school.resetCodeExpires < Date.now()) {
-    return res.status(401).json({ error: 'Invalid or expired reset code' });
+  // Check if the expiration time has passed (link is expired)
+  if (expirationTime < Date.now()) {
+    return res.status(401).json({ error: 'Reset link has expired' });
   }
 
   // Reset the user's password
@@ -270,14 +248,11 @@ async function resetPassword(req,res){
   const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
   school.password = hashedPassword;
 
-  // Clear the reset code and timestamp
-  school.resetCode = null;
-  school.resetCodeExpires = null;
-
   await school.save();
 
   res.status(200).json({ message: 'Password reset successful' });
 }
+
 
 async function updateTiming(req,res){
   const { schoolId, day, openTime, closeTime } = req.body;
@@ -310,7 +285,30 @@ async function updateTiming(req,res){
   }
 }
 
+async function deleteUnverifiedSchools() {
+  try {
+    // Find schools with 'unverified' status and registration time older than 24 hours
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const unverifiedSchoolsToDelete = await School.find({
+      status: 'unverified',
+      createdAt: { $lt: twentyFourHoursAgo },
+    }).exec();
+
+    for (const school of unverifiedSchoolsToDelete) {
+      // You might want to send a notification or do additional cleanup before deleting
+      console.log(`Deleting unverified school with ID: ${school._id}`);
+      await School.deleteOne({ _id: school._id }).exec();
+    }
+  } catch (err) {
+    console.error('Error while deleting unverified schools:', err);
+  }
+}
+
+// Schedule the task to run every day at a specific time (e.g., midnight)
+cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run every day at a specific time (e.g., midnight)
+
+
 
 module.exports = {
-  registerSchool,verifyEmail,Login,verify,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming
+  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming
 };
