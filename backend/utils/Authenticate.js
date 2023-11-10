@@ -30,7 +30,17 @@ let VerifySchool = (req, res, next) => {
     }
 }
 
+let VerifyAdmin = (req, res, next) => {
+    if (req.decoded.role == "admin") {
+        next();
+    }
+    else {
+        res.status(401).json({ "Success": false, "Message": "Unauthorized Access" });
+    }
+}
+
 module.exports = {
     VerifyRegistrationToken,
     VerifySchool,
+    VerifyAdmin
 }

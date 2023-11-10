@@ -142,49 +142,64 @@ async function Login(req, res) {
 }
 
 
-async function changeSchoolStatusById(schoolId, newStatus) {
+async function changeSchoolStatusById(req, res) {
   try {
+    const { schoolId, newStatus } = req.body;
+
     // Find the school by its ID
     const school = await School.findById(schoolId);
 
     if (!school) {
-      return { success: false, message: 'School not found' };
+      return res.status(404).json({ success: false, message: 'School not found' });
     }
 
     // Check if the new status is one of the allowed values
     if (!['unverified', 'verified', 'active', 'inactive', 'blocked'].includes(newStatus)) {
-      return { success: false, message: 'Invalid status value' };
+      return res.status(400).json({ success: false, message: 'Invalid status value' });
     }
 
     // Update the school's status
     school.status = newStatus;
     await school.save();
 
-    return { success: true, message: 'School status updated successfully' };
+    // Send a success response
+    res.status(200).json({ success: true, message: 'School status updated successfully' });
   } catch (error) {
-    return { success: false, message: 'An error occurred while updating the school status' };
+    console.error(error);
+    // Send an error response
+    res.status(500).json({ success: false, message: 'An error occurred while updating the school status' });
   }
 }
 
-async function getAllSchools() {
+async function getAllSchools(req, res) {
   try {
     const schools = await School.find();
-    return schools;
+    
+    // Send schools in the response
+    res.status(200).json({ schools });
   } catch (error) {
-    throw new Error('An error occurred while fetching all schools');
+    console.error(error);
+    // Send an error response
+    res.status(500).json({ error: 'An error occurred while fetching all schools' });
   }
 }
 
-async function getSchoolsByStatus(status) {
+async function getSchoolsByStatus(req, res) {
   try {
+    const { status } = req.body;
+
     if (!['unverified', 'verified', 'active', 'inactive', 'blocked'].includes(status)) {
-      throw new Error('Invalid status value');
+      return res.status(400).json({ error: 'Invalid status value' });
     }
 
     const schools = await School.find({ status: status });
-    return schools;
+
+    // Send schools in the response
+    res.status(200).json({ schools });
   } catch (error) {
-    throw new Error('An error occurred while filtering schools by status');
+    console.error(error);
+    // Send an error response
+    res.status(500).json({ error: 'An error occurred while filtering schools by status' });
   }
 }
 
