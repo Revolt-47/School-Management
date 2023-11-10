@@ -52,7 +52,7 @@ const schoolSchema = new mongoose.Schema({
         required: true,
       },
     },
-    // You can add more timing objects for different days as needed
+
   ],
 });
 
