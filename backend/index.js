@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 const schoolRouter = require('./routes/SchoolRouter');
 const superAdminRouter = require('./routes/SuperAdminRouter');
 const mongoose = require('mongoose');
+const studentRouter = require('./routes/StudentRoute');
 cors = require("cors")
 
 app.use(cors({
@@ -32,6 +33,7 @@ app.use(express.json());
 
 app.use('/schools', schoolRouter);
 app.use('/superadmin',superAdminRouter);
+app.use('/students',studentRouter);
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
