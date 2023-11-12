@@ -184,6 +184,31 @@ async function getAllSchools(req, res) {
   }
 }
 
+async function getSchoolById(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Check if the ID is valid
+    if (!(id)) {
+      return res.status(400).json({ error: 'Invalid school ID' });
+    }
+
+    const school = await School.findById(id);
+
+    if (!school) {
+      return res.status(404).json({ error: 'School not found' });
+    }
+
+    // Send school details in the response
+    res.status(200).json({ school });
+  } catch (error) {
+    console.error(error);
+    // Send an error response
+    res.status(500).json({ error: 'An error occurred while fetching school details by ID' });
+  }
+}
+
+
 async function getSchoolsByStatus(req, res) {
   try {
     const { status } = req.body;
@@ -337,5 +362,5 @@ cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run 
 
 
 module.exports = {
-  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming
+  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
 };

@@ -5,6 +5,11 @@ const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 const schoolRouter = require('./routes/SchoolRouter');
 const superAdminRouter = require('./routes/SuperAdminRouter');
 const mongoose = require('mongoose');
+cors = require("cors")
+
+app.use(cors({
+  origin: "*"
+}))
 
 const dbUrl = 'mongodb+srv://revolt:revolt47@cluster0.rxk1sz1.mongodb.net/?retryWrites=true&w=majority'; // Replace with your actual database name
 mongoose.connect(dbUrl, {
