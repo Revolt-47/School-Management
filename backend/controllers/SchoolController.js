@@ -359,8 +359,20 @@ async function deleteUnverifiedSchools() {
 // Schedule the task to run every day at a specific time (e.g., midnight)
 cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run every day at a specific time (e.g., midnight)
 
+const getTotalSchoolCount = async (req,res) =>{
+  try {
+    // Use the countDocuments method to get the total count of students
+    const totalSchoolCount = await School.countDocuments();
+
+    res.status(200).json({ totalSchoolCount });
+  } catch (error) {
+    console.error('Error getting total school count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
 
 
 module.exports = {
-  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
+
+  getTotalSchoolCount,registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
 };

@@ -1,6 +1,6 @@
 const express = require('express');
 const Schoolrouter = express.Router();
-const { getSchoolById,registerSchool, verifyEmail,Login,resetPassword,forgotPassword,updateTiming,getAllSchools,getSchoolsByStatus,changeSchoolStatusById } = require('../controllers/SchoolController'); 
+const { getTotalSchoolCount,getSchoolById,registerSchool, verifyEmail,Login,resetPassword,forgotPassword,updateTiming,getAllSchools,getSchoolsByStatus,changeSchoolStatusById } = require('../controllers/SchoolController'); 
 const {VerifyRegistrationToken,VerifySchool,VerifyAdmin} = require('../utils/Authenticate')
 
 // Define routes for registering a school and verifying email
@@ -13,5 +13,6 @@ Schoolrouter.post('/update-timing',VerifyRegistrationToken,VerifySchool,updateTi
 Schoolrouter.post('/getallschools',VerifyRegistrationToken,VerifyAdmin,getAllSchools)
 Schoolrouter.post('/getschool/:id',VerifyRegistrationToken,VerifyAdmin,getSchoolById)
 Schoolrouter.post('/changestatus',VerifyRegistrationToken,VerifyAdmin,changeSchoolStatusById)
+Schoolrouter.get('/totalschools',VerifyRegistrationToken,VerifyAdmin,getTotalSchoolCount)
 
 module.exports = Schoolrouter;

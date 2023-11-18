@@ -8,7 +8,7 @@ const schoolSchema = new mongoose.Schema({
   },
   numberOfStudents: {
     type: Number,
-    required: true,
+    default:0,
   },
   address: {
     type: String, // We can store the Google Maps location as a string

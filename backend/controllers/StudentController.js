@@ -2,46 +2,53 @@ const Student = require('../models/StudentModel'); // Adjust the path based on y
 
 // Function to add a new student
 const addStudent = async (req, res) => {
-  try {
-    const {
-      name,
-      cnic,
-      rollNumber,
-      rfidTag,
-      section,
-      class: studentClass,
-      school,
-    } = req.body;
-
-    // Check if the CNIC or roll number already exists
-    const existingStudent = await Student.findOne({
-      $or: [{ cnic }, { rollNumber }],
-    });
-
-    if (existingStudent) {
-      return res.status(400).json({ error: 'Student with CNIC or Roll Number already exists.' });
+    try {
+      const {
+        name,
+        cnic,
+        rollNumber,
+        rfidTag,
+        section,
+        class: studentClass,
+        school,
+      } = req.body;
+  
+      // Check if the CNIC or roll number already exists
+      const existingStudent = await Student.findOne({
+        $or: [{ cnic }, { rollNumber }],
+      });
+  
+      if (existingStudent) {
+        return res.status(400).json({ error: 'Student with CNIC or Roll Number already exists.' });
+      }
+  
+      // Create a new student
+      const newStudent = new Student({
+        name,
+        cnic,
+        rollNumber,
+        rfidTag,
+        section,
+        class: studentClass,
+        school,
+      });
+  
+      // Save the new student to the database
+      await newStudent.save();
+  
+      // Update the numberOfStudents for the corresponding school
+      await School.findByIdAndUpdate(
+        school,
+        { $inc: { numberOfStudents: 1 } }, // Increment the numberOfStudents by 1
+        { new: true } // Return the updated school document
+      );
+  
+      res.status(201).json({ message: 'Student added successfully.', student: newStudent });
+    } catch (error) {
+      console.error('Error adding student:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-
-    // Create a new student
-    const newStudent = new Student({
-      name,
-      cnic,
-      rollNumber,
-      rfidTag,
-      section,
-      class: studentClass,
-      school,
-    });
-
-    // Save the new student to the database
-    await newStudent.save();
-
-    res.status(201).json({ message: 'Student added successfully.', student: newStudent });
-  } catch (error) {
-    console.error('Error adding student:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
+  };
 
 // Function to delete a student
 const deleteStudent = async (req, res) => {
@@ -94,8 +101,38 @@ const updateStudent = async (req, res) => {
     }
   };
 
+  // Function to get students of a school
+const getStudentsBySchool = async (req, res) => {
+    try {
+      const { schoolId } = req.params; // Assuming schoolId is provided in the request parameters
+  
+      // Find students with the given schoolId
+      const students = await Student.find({ school: schoolId });
+  
+      res.status(200).json({ students });
+    } catch (error) {
+      console.error('Error getting students by school:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+
+const getTotalStudentsCount = async (req,res) =>{
+  try {
+    // Use the countDocuments method to get the total count of students
+    const totalStudentsCount = await Student.countDocuments();
+
+    res.status(200).json({ totalStudentsCount });
+  } catch (error) {
+    console.error('Error getting total students count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+}
+
 module.exports = {
   addStudent,
   deleteStudent,
-  updateStudent
+  updateStudent,
+  getStudentsBySchool,
+  getTotalStudentsCount
 };

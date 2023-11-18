@@ -6,6 +6,7 @@ const schoolRouter = require('./routes/SchoolRouter');
 const superAdminRouter = require('./routes/SuperAdminRouter');
 const mongoose = require('mongoose');
 const studentRouter = require('./routes/StudentRoute');
+const guardianRouter = require('./routes/GuardianRouter');
 cors = require("cors")
 
 app.use(cors({
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use('/schools', schoolRouter);
 app.use('/superadmin',superAdminRouter);
 app.use('/students',studentRouter);
+app.use('/guardian',guardianRouter);
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
