@@ -5,6 +5,26 @@ const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 const schoolRouter = require('./routes/SchoolRouter');
 const superAdminRouter = require('./routes/SuperAdminRouter');
 const mongoose = require('mongoose');
+const cors = require('cors');
+
+var allowedOrigins = [
+  'http://localhost:3002',
+];
+app.use(cors({
+  origin: function(origin, callback){
+    // allow requests with no origin 
+    // (like mobile apps or curl requests)
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      var msg = 'The CORS policy for this site does not ' +
+                'allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  allowedHeaders: 'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+}));
 
 const dbUrl = 'mongodb+srv://revolt:revolt47@cluster0.rxk1sz1.mongodb.net/?retryWrites=true&w=majority'; // Replace with your actual database name
 mongoose.connect(dbUrl, {

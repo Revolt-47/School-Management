@@ -1,7 +1,7 @@
-import React from 'react';
-import image from '../van guardian logo.png';
+import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import image from '../van guardian logo.png';
 
 const containerStyle = {
   display: "flex",
@@ -21,13 +21,40 @@ const rightHalfStyle = {
   marginRight: "-100px"
 }
 
-
 function SignInPage() {
+  const [apiResponse, setApiResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3000/schools/Login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: e.target.username.value,
+          password: e.target.password.value,
+        }),
+      });
+
+      const data = await response.json();
+
+      setApiResponse(data);
+    } catch (error) {
+      console.error('Error during API request:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main style={containerStyle}>
-
       <section style={leftHalfStyle}>
-
         <Container fluid>
           <Row className="mt-5 align-items-start justify-content-center">
             <Col xs={12} md={10} lg={8}>
@@ -37,11 +64,10 @@ function SignInPage() {
                   Sign in to
                 </p>
                 <p style={{ fontSize: '25px', justifyContent: "center" }}>School Management Dashboard</p>
-
-                <Form>
+                <Form onSubmit={handleSubmit}>
                   <Form.Group controlId="formBasicEmail" className="mb-4">
-                    <Form.Label>Username</Form.Label>
-                    <Form.Control type="text" placeholder="Enter Username" name="username" required />
+                    <Form.Label>Username or Email</Form.Label>
+                    <Form.Control type="text" placeholder="Enter Username or Email" name="username" required />
                   </Form.Group>
 
                   <Form.Group controlId="formBasicPassword" className="mb-4">
@@ -61,9 +87,12 @@ function SignInPage() {
                   </Button>
                 </Form>
 
+                {apiResponse && <p>{apiResponse.message}</p>}
+                {loading && <p>Loading...</p>}
+
                 <p style={{ fontSize: '15px', marginTop: '30px', textAlign: 'center' }}>
-            Don't have an account? <Link to="/signUp" style={{ color: 'black' }}>Register</Link>
-        </p>
+                  Don't have an account? <Link to="/signUp" style={{ color: 'black' }}>Register</Link>
+                </p>
               </div>
             </Col>
           </Row>
@@ -73,7 +102,6 @@ function SignInPage() {
       <section style={rightHalfStyle}>
         <img src={image} alt="logo" style={{ maxWidth: "100%", maxHeight: "100%" }} />
       </section>
-     
     </main>
   );
 }

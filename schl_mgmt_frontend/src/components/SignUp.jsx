@@ -6,8 +6,8 @@ import image from '../van guardian logo.png';
 
 const SignUpForm = () => {
   const [step, setStep] = useState(1);
-  const [showValidationError, setShowValidationError] = useState(false); // New state for validation errors
-
+  const [showValidationError, setShowValidationError] = useState(false);
+  const [showPasswordMismatchError, setShowPasswordMismatchError] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -15,41 +15,43 @@ const SignUpForm = () => {
     password: '',
     confirmPassword: '',
     schoolType: '',
-    studentsCount: '',
-    gatesCount: '',
+    numberofStudents: '',
+    numberofGates: '',
+    branchName: '',  // Added field for branchName
+    address: '',     // Added field for address
+    city: '',        // Added field for city
   });
+  const [apiResponse, setApiResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const containerStyle = {
-    display: "flex",
-    height: "92vh",
-    padding: "60px",
-    justifyContent: "space-around",
-    overflowX: "hidden", // Hide horizontal overflow
-    overflowY: "auto", // Add vertical scroll if needed
+    display: 'flex',
+    height: '92vh',
+    padding: '60px',
+    justifyContent: 'space-around',
+    overflowX: 'hidden',
+    overflowY: 'auto',
   };
 
   const leftHalfStyle = {
-    flex: "1",
-    marginLeft: "-200px",
+    flex: '1',
+    marginLeft: '-200px',
   };
 
   const rightHalfStyle = {
-    flex: "1",
-    padding: "20px",
-    marginRight: "-100px",
+    flex: '1',
+    padding: '20px',
+    marginRight: '-100px',
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
-    // Reset validation error when user types in step 1
-    if (step === 1) {
-      setShowValidationError(false);
-    }
+    setShowValidationError(false);
+    setShowPasswordMismatchError(false);
   };
 
-  const handleNextStep = () => {
-    // Validate step 1 fields
+  const handleNextStep = async () => {
     if (
       step === 1 &&
       (!formData.username ||
@@ -62,7 +64,13 @@ const SignUpForm = () => {
       return;
     }
 
-    // Validate other steps if needed
+    if (step === 1 && formData.password !== formData.confirmPassword) {
+      setShowPasswordMismatchError(true);
+      return;
+    }
+
+    setShowValidationError(false);
+    setShowPasswordMismatchError(false);
 
     setStep((prevStep) => prevStep + 1);
   };
@@ -71,17 +79,41 @@ const SignUpForm = () => {
     setStep((prevStep) => prevStep - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Implement your registration logic here
-    console.log('Form submitted:', formData);
+
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3000/schools/register-school', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          numberOfStudents: formData.numberofStudents,
+          numberOfGates: formData.numberofGates,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setApiResponse(data);
+    } catch (error) {
+      console.error('Error during API request:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <main style={containerStyle}>
       <section style={leftHalfStyle}>
         <Container fluid>
-          {/* Step Indicators */}
           <Row className="mb-4 justify-content-center">
             <Col xs="auto">
               <div className={`step-indicator ${step === 1 ? 'active' : ''}`}>1</div>
@@ -90,20 +122,15 @@ const SignUpForm = () => {
               <div className={`step-indicator ${step === 2 ? 'active' : ''}`}>2</div>
             </Col>
           </Row>
-          {/* Form */}
           <Row className="mt-5 align-items-start justify-content-center">
             <Col xs={12} md={10} lg={8}>
-              <div className="form-container" style={{ marginBottom: "20px" }}>
+              <div className="form-container" style={{ marginBottom: '20px' }}>
                 <h3 style={{ marginBottom: '30px' }}>Welcome</h3>
-
-                {/* Heading */}
                 <h3 style={{ marginBottom: '30px', textAlign: 'center' }}>Registration Form</h3>
-
                 <Form onSubmit={handleSubmit}>
-                  {/* Step 1: Account Information */}
                   {step === 1 && (
                     <>
-                      <Form.Group controlId="username" className="mb-4">
+                     <Form.Group controlId="username" className="mb-4"> 
                         <Form.Label>Username</Form.Label>
                         <Form.Control
                           type="text"
@@ -115,7 +142,6 @@ const SignUpForm = () => {
                         />
                       </Form.Group>
 
-                      {/* Add other account information fields (email, contactNumber, password, confirmPassword) here */}
                       <Form.Group controlId="email" className="mb-4">
                         <Form.Label>Email</Form.Label>
                         <Form.Control
@@ -138,7 +164,7 @@ const SignUpForm = () => {
                           onChange={handleInputChange}
                           required
                         />
-                      </Form.Group>
+                      </Form.Group> 
 
                       <Form.Group controlId="password" className="mb-4">
                         <Form.Label>Password</Form.Label>
@@ -165,18 +191,35 @@ const SignUpForm = () => {
                       </Form.Group>
 
                       {showValidationError && (
-                        <p style={{ color: 'red', marginBottom: '10px' }}>
-                          Please fill in all fields before proceeding.
-                        </p>
+                        <p style={{ color: 'red', fontSize: '15px' }}>Please fill all the fields</p>
                       )}
 
-                      <Button variant="dark" onClick={handleNextStep} className="mb-4" style={{ width: '100%' }}>
-                        Next
+                      {showPasswordMismatchError && (
+                        <p style={{ color: 'red', fontSize: '15px' }}>Passwords do not match</p>
+                      )}
+
+                      <p style={{ fontSize: '15px', textAlign: 'center' }}>
+                        <span
+                          onClick={handlePrevStep}
+                          style={{ cursor: 'pointer', color: 'purple' }}
+                        >
+                          Previous
+                        </span>
+                      </p>
+
+                      
+                      <Button
+                        variant="dark"
+                        type="button"
+                        className="mb-4"
+                        style={{ width: '100%' }}
+                        onClick={handleNextStep}
+                      >
+                        Next Step
                       </Button>
                     </>
                   )}
 
-                  {/* Step 2: School Information */}
                   {step === 2 && (
                     <>
                       <Form.Group controlId="schoolType" className="mb-4">
@@ -194,42 +237,86 @@ const SignUpForm = () => {
                         </Form.Control>
                       </Form.Group>
 
-                      {/* Add other school information fields (studentsCount, gatesCount) here */}
-                      <Form.Group controlId="studentsCount" className="mb-4">
+                      <Form.Group controlId="branchName" className="mb-4">
+                        <Form.Label>Branch Name</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter Branch Name"
+                          name="branchName"
+                          value={formData.branchName}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group controlId="address" className="mb-4">
+                        <Form.Label>Address</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter Address"
+                          name="address"
+                          value={formData.address}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group controlId="city" className="mb-4">
+                        <Form.Label>City</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter City"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </Form.Group>
+
+                      <Form.Group controlId="numberofStudents" className="mb-4">
                         <Form.Label>Number of Students</Form.Label>
                         <Form.Control
                           type="number"
                           placeholder="Enter Number of Students"
-                          name="studentsCount"
-                          value={formData.studentsCount}
+                          name="numberofStudents"
+                          value={formData.numberofStudents}
                           onChange={handleInputChange}
                           required
                         />
                       </Form.Group>
 
-                      <Form.Group controlId="gatesCount" className="mb-4">
+                      <Form.Group controlId="numberofGates" className="mb-4">
                         <Form.Label>Number of Gates</Form.Label>
                         <Form.Control
                           type="number"
                           placeholder="Enter Number of Gates"
-                          name="gatesCount"
-                          value={formData.gatesCount}
+                          name="numberofGates"
+                          value={formData.numberofGates}
                           onChange={handleInputChange}
                           required
                         />
                       </Form.Group>
 
-                      <Button variant="dark" type="submit" className="mb-4" style={{ width: '100%' }}>
+                      <Button
+                        variant="dark"
+                        type="submit"
+                        className="mb-4"
+                        style={{ width: '100%' }}
+                      >
                         Register
                       </Button>
                       <p style={{ fontSize: '15px', textAlign: 'center' }}>
-                        <span onClick={handlePrevStep} style={{ cursor: 'pointer', color: 'purple' }}>Previous</span>
+                        <span
+                          onClick={handlePrevStep}
+                          style={{ cursor: 'pointer', color: 'purple' }}
+                        >
+                          Previous
+                        </span>
                       </p>
                     </>
                   )}
                 </Form>
 
-                {/* Navigation links */}
                 <p style={{ fontSize: '15px', marginTop: '10px', textAlign: 'center' }}>
                   Already have an account? <Link to="/signIn" style={{ color: 'black' }}>Sign In</Link>
                 </p>
@@ -240,7 +327,7 @@ const SignUpForm = () => {
       </section>
 
       <section style={rightHalfStyle}>
-        <img src={image} alt="logo" style={{ maxWidth: "100%", maxHeight: "100%" }} />
+        <img src={image} alt="logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
       </section>
     </main>
   );

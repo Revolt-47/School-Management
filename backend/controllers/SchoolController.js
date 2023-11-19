@@ -24,7 +24,8 @@ async function registerSchool(req, res) {
       branchName: req.body.branchName,
       numberOfStudents: req.body.numberOfStudents,
       address: req.body.address,
-      username: req.body.address,
+      username: req.body.username,
+      password: req.body.password,
       city: req.body.city,
       numberOfGates: req.body.numberOfGates,
       email: req.body.email,
@@ -118,7 +119,7 @@ async function Login(req, res) {
 
   try {
     // Find the school by either 'branchName' or 'email'
-    const school = await School.findOne({ $or: [{ branchName: identifier }, { email: identifier }] });
+    const school = await School.findOne({ $or: [{ username: identifier }, { email: identifier }] });
 
     if (!school) {
       return res.status(404).json({ error: 'School not found' });
@@ -130,7 +131,7 @@ async function Login(req, res) {
     }
 
     // Generate a JWT token
-    const payload = { schoolId: school._id, username: school.branchName, email: school.email, role: 'school' };
+    const payload = { schoolId: school._id, username: school.username, email: school.email, role: 'school' };
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '72h' });
 
     // Return the token along with a success message
