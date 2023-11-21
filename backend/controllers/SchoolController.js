@@ -45,7 +45,30 @@ async function registerSchool(req, res) {
     const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
 
     // Send the verification link in the email
-    // ... (your email sending logic)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'amirdaniyal47@gmail.com',
+        pass: 'zucq jdwo iqwp wttd',
+      },
+    });
+
+    const mailOptions = {
+      from: 'amirdaniyal47@email.com',
+      to: req.body.email, // Assuming email is provided in the request body
+      subject: 'Verification Link for School Registration',
+      text: `Click on the following link to verify your registration: ${verificationLink}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while sending the verification link.' });
+      } else {
+        console.log('Email sent: ' + info.response);
+        res.status(201).json("Check your email");
+      }
+    });
 
     res.status(201).json({ success: true, message: 'Registration successful. Check your email.', status: 'success' });
   } catch (error) {
@@ -142,7 +165,7 @@ async function changeSchoolStatusById(req, res) {
 async function getAllSchools(req, res) {
   try {
     const schools = await School.find();
-    
+
     // Send schools in the response
     res.status(200).json({ schools });
   } catch (error) {
@@ -189,7 +212,7 @@ async function forgotPassword(req, res) {
 
   // Include the reset token and expiration time in the reset link
   const resetLink = `http://localhost:3000/reset-password/${school._id}/${resetToken}/${expirationTime}`;
-  
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -217,7 +240,7 @@ async function forgotPassword(req, res) {
 
 async function resetPassword(req, res) {
   const { schoolId, resetToken, expirationTime, newPassword } = req.body;
-  
+
   // Find the school by ID
   const school = await School.findById(schoolId);
 
@@ -255,20 +278,20 @@ async function updateTiming(req, res) {
     // Check if the specified day exists in the timings array
     const dayIndex = school.timings.findIndex((timing) => timing.day === day);
 
-    
-if (dayIndex === -1) {
-  // If the day does not exist, add a new timing
-  school.timings.push({
-    day,
-    openTime: moment(openTime, 'hh:mm A').toDate(),
-    closeTime: moment(closeTime, 'hh:mm A').toDate(),
-  });
-} else {
-  // Update the open and close times if the day exists
-  school.timings[dayIndex].openTime = moment(openTime, 'hh:mm A').toDate();
-  school.timings[dayIndex].closeTime = moment(closeTime, 'hh:mm A').toDate();
-}
-    
+
+    if (dayIndex === -1) {
+      // If the day does not exist, add a new timing
+      school.timings.push({
+        day,
+        openTime: moment(openTime, 'hh:mm A').toDate(),
+        closeTime: moment(closeTime, 'hh:mm A').toDate(),
+      });
+    } else {
+      // Update the open and close times if the day exists
+      school.timings[dayIndex].openTime = moment(openTime, 'hh:mm A').toDate();
+      school.timings[dayIndex].closeTime = moment(closeTime, 'hh:mm A').toDate();
+    }
+
 
     // Save the changes
     await school.save();
@@ -305,5 +328,5 @@ cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run 
 
 
 module.exports = {
-  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming
+  registerSchool, verifyEmail, Login, getAllSchools, getSchoolsByStatus, changeSchoolStatusById, forgotPassword, resetPassword, updateTiming
 };
