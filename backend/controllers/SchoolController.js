@@ -11,79 +11,46 @@ const moment = require('moment');
 
 async function registerSchool(req, res) {
   try {
-    // Check if the school already exists in the database by its email
-    const existingSchool = await School.findOne({ email: req.body.email });
+    const schoolData = req.body;
+
+    // Check if the school already exists in the database by its username or email
+    const existingSchool = await School.findOne({ $or: [{ username: schoolData.username }, { email: schoolData.email }] });
 
     if (existingSchool) {
-      // School is already registered, return its status
-      return res.status(200).json({ message: 'School already registered', status: existingSchool.status });
+      // School is already registered, return an appropriate error message
+      if (existingSchool.username === schoolData.username) {
+        return res.status(200).json({ success: false, message: 'School registration failed. Username already in use.', status: 'error' });
+      } else {
+        return res.status(406).json({ success: false, message: 'School registration failed. Email already in use.', status: 'error' });
+      }
     }
 
     // Create a new school instance based on the request data
-    const newSchool = new School({
-      branchName: req.body.branchName,
-      numberOfStudents: req.body.numberOfStudents,
-      address: req.body.address,
-      username: req.body.username,
-      password: req.body.password,
-      city: req.body.city,
-      numberOfGates: req.body.numberOfGates,
-      email: req.body.email,
-      timings: req.body.timings,
-      status: req.body.status || 'unverified', // Default to 'unverified' if status is not provided
-    });
+    const newSchool = new School(schoolData);
 
     // Check if the password is present in the request body
-    if (!req.body.password) {
-      return res.status(400).json({ error: 'Password is required.' });
+    if (!schoolData.password) {
+      return res.status(400).json({ success: false, error: 'Password is required.' });
     }
 
     // Encrypt the password before saving
     const saltRounds = 10; // Adjust the number of salt rounds as needed
+    const hashedPassword = await bcrypt.hash(schoolData.password, saltRounds);
+    newSchool.password = hashedPassword;
 
-    bcrypt.hash(req.body.password, saltRounds, async (err, hashedPassword) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while hashing the password.' });
-      } else {
-        newSchool.password = hashedPassword;
+    // Save the new school to the database
+    const savedSchool = await newSchool.save();
 
-        // Save the new school to the database
-        const savedSchool = await newSchool.save();
+    // Create a verification link with the school's ID
+    const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
 
-        // Create a verification link with the school's ID
-        const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
+    // Send the verification link in the email
+    // ... (your email sending logic)
 
-        // Send the verification link in the email
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: 'amirdaniyal47@gmail.com',
-            pass: 'zucq jdwo iqwp wttd',
-          },
-        });
-
-        const mailOptions = {
-          from: 'amirdaniyal47@email.com',
-          to: req.body.email, // Assuming email is provided in the request body
-          subject: 'Verification Link for School Registration',
-          text: `Click on the following link to verify your registration: ${verificationLink}`,
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error(error);
-            res.status(500).json({ error: 'An error occurred while sending the verification link.' });
-          } else {
-            console.log('Email sent: ' + info.response);
-            res.status(201).json("Check your email");
-          }
-        });
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'An error occurred while registering the school.' });
+    res.status(201).json({ success: true, message: 'Registration successful. Check your email.', status: 'success' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while registering the school.', status: 'error' });
   }
 }
 

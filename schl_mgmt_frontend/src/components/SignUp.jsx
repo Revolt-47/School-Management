@@ -97,18 +97,25 @@ const SignUpForm = () => {
         }),
       });
 
-      if (!response.ok) {
+      if (response.status === 201) {
+        setApiResponse({ success: true, message: 'Registration successful! Check your email' });
+      } else if (response.status === 200) {
+        setApiResponse({ success: false, message: 'User with the entered username already exists.' });
+      }else if(response.status === 406){
+        setApiResponse({ success: false, message: 'User with the entered email already exists.' }); 
+      }
+      else {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
-      const data = await response.json();
-      setApiResponse(data);
     } catch (error) {
       console.error('Error during API request:', error);
+      // Handle specific error scenarios and show user-friendly messages
+      setApiResponse({ success: false, message: 'An error occurred during registration.' });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <main style={containerStyle}>
@@ -130,7 +137,7 @@ const SignUpForm = () => {
                 <Form onSubmit={handleSubmit}>
                   {step === 1 && (
                     <>
-                     <Form.Group controlId="username" className="mb-4"> 
+                      <Form.Group controlId="username" className="mb-4">
                         <Form.Label>Username</Form.Label>
                         <Form.Control
                           type="text"
@@ -164,7 +171,7 @@ const SignUpForm = () => {
                           onChange={handleInputChange}
                           required
                         />
-                      </Form.Group> 
+                      </Form.Group>
 
                       <Form.Group controlId="password" className="mb-4">
                         <Form.Label>Password</Form.Label>
@@ -207,7 +214,7 @@ const SignUpForm = () => {
                         </span>
                       </p>
 
-                      
+
                       <Button
                         variant="dark"
                         type="button"
@@ -297,6 +304,19 @@ const SignUpForm = () => {
                         />
                       </Form.Group>
 
+
+                      {loading && <p>Loading...</p>}
+
+                      <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                        {apiResponse && apiResponse.success && (
+                          <p style={{ color: 'green', fontSize: '15px' }}>{apiResponse.message}</p>
+                        )}
+      
+                        {apiResponse && !apiResponse.success && (
+                          <p style={{ color: 'red', fontSize: '15px' }}>{apiResponse.message}</p>
+                        )}
+                      </div>
+
                       <Button
                         variant="dark"
                         type="submit"
@@ -326,9 +346,14 @@ const SignUpForm = () => {
         </Container>
       </section>
 
+
+
       <section style={rightHalfStyle}>
         <img src={image} alt="logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
       </section>
+
+
+
     </main>
   );
 };
