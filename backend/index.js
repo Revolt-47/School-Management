@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 var allowedOrigins = [
-  'http://localhost:3002',
+  'http://localhost:3001',
 ];
 app.use(cors({
   origin: function(origin, callback){

@@ -78,8 +78,8 @@ function SignInPage() {
                   <Form.Group controlId="formBasicCheckbox" className="d-flex align-items-center mb-4 justify-content-between">
                     <Form.Check type="checkbox" label="Remember me" />
                     <p style={{ fontSize: '15px', marginBottom: '0' }}>
-                      <a href="/forgot-password" style={{ color: 'black' }}>Forgot Password?</a>
-                    </p>
+              <Link to="/forgot-password" style={{ color: 'black' }}>Forgot Password?</Link>
+            </p>
                   </Form.Group>
 
                   <Button variant="dark" type="submit" className="mb-4" style={{ width: '100%' }}>
