@@ -4,6 +4,7 @@ import Home from './Home';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import ForgotPassword from './ForgotPass'; // Import the ForgotPassword component
+import EmailVerification from './EmailVerification';
 
 function NavBar() {
   const navLinksStyle = {
@@ -33,6 +34,7 @@ function NavBar() {
         <Route path="/signIn/*" element={<SignIn />} />
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Add this line for the ForgotPassword route */}
+        <Route path="/verify-email/:schoolId" element={<EmailVerification />} />
       </Routes>
     </div>
   );

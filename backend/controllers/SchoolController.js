@@ -42,7 +42,7 @@ async function registerSchool(req, res) {
     const savedSchool = await newSchool.save();
 
     // Create a verification link with the school's ID
-    const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
+    const verificationLink = `http://localhost:3001/verify-email/${savedSchool._id}`; // frontend link
 
     // Send the verification link in the email
     const transporter = nodemailer.createTransport({
@@ -96,7 +96,7 @@ async function verifyEmail(req, res) {
     school.status = 'verified';
     await school.save();
 
-    res.json({ message: 'School email verified successfully' });
+    res.status(200).json({ message: 'School email verified successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'An error occurred while verifying the email' });
