@@ -5,6 +5,7 @@ import SignIn from './SignIn';
 import SignUp from './SignUp';
 import ForgotPassword from './ForgotPass'; // Import the ForgotPassword component
 import EmailVerification from './EmailVerification';
+import ResetPassword from './ResetPassword'; // Import the ResetPassword component  
 
 function NavBar() {
   const navLinksStyle = {
@@ -35,6 +36,7 @@ function NavBar() {
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Add this line for the ForgotPassword route */}
         <Route path="/verify-email/:schoolId" element={<EmailVerification />} />
+        <Route path="/reset-password/:schoolId/:resetToken/:expirationTime" element={<ResetPassword />} /> {/* Add this line for the ResetPassword route */}
       </Routes>
     </div>
   );
