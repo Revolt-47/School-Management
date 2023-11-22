@@ -27,7 +27,7 @@ async function registerSchool(req, res) {
 
     // Create a new school instance based on the request data
     const newSchool = new School(schoolData);
-
+  
     // Check if the password is present in the request body
     if (!schoolData.password) {
       return res.status(400).json({ success: false, error: 'Password is required.' });
@@ -35,7 +35,7 @@ async function registerSchool(req, res) {
 
     // Encrypt the password before saving
     const saltRounds = 10; // Adjust the number of salt rounds as needed
-    const hashedPassword = await bcrypt.hash(schoolData.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(schoolData.password.trim(), saltRounds);
     newSchool.password = hashedPassword;
 
     // Save the new school to the database
@@ -105,7 +105,9 @@ async function verifyEmail(req, res) {
 
 
 async function Login(req, res) {
-  const { identifier, password } = req.body;
+  var { identifier, password } = req.body;
+  identifier = identifier.trim();
+  password = password.trim();
 
   try {
     // Find the school by either 'branchName' or 'email'
@@ -116,7 +118,7 @@ async function Login(req, res) {
     }
 
     // Check the password using bcrypt
-    if (!bcrypt.compareSync(password, school.password)) {
+    if (!bcrypt.compareSync(password, school.password.trim())) {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
