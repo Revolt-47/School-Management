@@ -48,9 +48,19 @@ let VerifyGuardian= (req, res, next) => {
     }
 }
 
+let VerifyDriver= (req, res, next) => {
+    if (req.decoded.role == "driver") {
+        next();
+    }
+    else {
+        res.status(401).json({ "Success": false, "Message": "Unauthorized Access" });
+    }
+}
+
 module.exports = {
     VerifyRegistrationToken,
     VerifySchool,
     VerifyAdmin,
-    VerifyGuardian
+    VerifyGuardian,
+    VerifyDriver
 }

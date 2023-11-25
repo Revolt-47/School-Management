@@ -5,7 +5,7 @@ const Guardian = require('../models/GuardianModel');
 const Student = require('../models/StudentModel');
 const jwt  = require('jsonwebtoken')
 
-const createGuardianAccount = async (req, res) => {
+const createGuardianAccount = async (req, res) => { 
   try {
     const {
       name,
@@ -13,27 +13,39 @@ const createGuardianAccount = async (req, res) => {
       address,
       contactNumber,
       email,
-      children, // Assuming children is an array of objects with childId and relation
+      children,
     } = req.body;
 
-    // Generate a random password
-    const randomPassword = crypto.randomBytes(8).toString('hex');
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
-
-    // Check if the guardian already exists
-    const existingGuardian = await Guardian.findOne({ cnic });
+    // Check if the email and CNIC combination is unique
+    const existingGuardian = await Guardian.findOne({ email, cnic });
 
     if (existingGuardian) {
       // If the guardian already exists, add the children to the guardian's children array
       if (children && Array.isArray(children)) {
-        children.forEach(async (child) => {
+        existingGuardian.children = existingGuardian.children || [];
+
+        for (const child of children) {
           const { childId, relation } = child;
-          if (!existingGuardian.children.some(c => c.child.equals(childId))) {
-            existingGuardian.children.push({ child: childId, relation });
+        
+
+          // Check if the child is already in the guardian's children array
+          if (
+            existingGuardian.children.some(
+              c => c.child && c.child.equals && c.child.equals(child.child)
+            )
+          ) {
+            return res.status(400).json({ error: 'Child is already associated with this guardian.' });
           }
-        });
+
+          // Check if the child exists in the system
+          const existingChild = await Student.findById(child.child);
+          if (!existingChild) {
+            return res.status(400).json({ error: 'Child does not exist in the system.' });
+          }
+
+          existingGuardian.children.push({ child: child.child, relation });
+        }
+
         await existingGuardian.save();
         res.status(200).json({ message: 'Children added to an existing guardian.' });
       } else {
@@ -47,19 +59,24 @@ const createGuardianAccount = async (req, res) => {
         address,
         contactNumber,
         email,
-        password: hashedPassword,
-        children: children || [], // Create an array with the children if provided
+        children: children || [],
       });
 
       // Save the new guardian to the database
       await newGuardian.save();
 
       // Send credentials over email using Node Mailer
+      const randomPassword = crypto.randomBytes(8).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      newGuardian.password = hashedPassword;
+      await newGuardian.save();
+
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'amirdaniyal47@gmail.com', // Replace with your Gmail email
-          pass: process.env.EMAILPW, // Replace with your Gmail password
+          user: 'amirdaniyal47@gmail.com',
+          pass: process.env.EMAILPW,
         },
       });
 
@@ -67,7 +84,7 @@ const createGuardianAccount = async (req, res) => {
         from: 'amirdaniyal47@gmail.com',
         to: email,
         subject: 'Your Credentials',
-        text: `Your credentials:\nContact Number: ${contactNumber}\nPassword: ${randomPassword} for VanGuardain Parent/Guardian app `,
+        text: `Your credentials:\nEmail: ${email}\nPassword: ${randomPassword} for VanGuardain Parent/Guardian app `,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -85,6 +102,7 @@ const createGuardianAccount = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // Function to delete a guardian by ID
 const deleteGuardianById = async (req, res) => {
@@ -198,14 +216,14 @@ const loginGuardian = async (req, res) => {
     const guardian = await Guardian.findOne({ email });
 
     if (!guardian) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid email' });
     }
 
     // Check if the password is correct
     const isPasswordValid = await bcrypt.compare(password, guardian.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid password.' });
     }
 
     // Generate a token (you may want to use a more secure approach in a production environment)
@@ -262,11 +280,46 @@ async function forgotPassword(req, res) {
   });
 }
 
+const changePassword = async (req, res) => {
+  try {
+    const { guardianId, oldPassword, newPassword } = req.body;
+
+    // Find the guardian by ID
+    const guardian = await Guardian.findById(guardianId);
+
+    if (!guardian) {
+      return res.status(404).json({ error: 'Guardian not found.' });
+    }
+
+    // Check if the old password is correct
+    const isPasswordValid = await bcrypt.compare(oldPassword, guardian.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid old password.' });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the guardian's password
+    guardian.password = hashedNewPassword;
+
+    // Save the updated guardian to the database
+    await guardian.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 async function resetPassword(req, res) {
   const { guardianId, resetToken, expirationTime, newPassword } = req.body;
   
   // Find the guardian by ID
-  const guardian = await guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId);
 
   if (!guardian) {
     return res.status(404).json({ error: 'User not found' });
@@ -296,5 +349,6 @@ module.exports = {
   removeChildFromGuardian,
   loginGuardian,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  changePassword
 };

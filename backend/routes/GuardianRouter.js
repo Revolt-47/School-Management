@@ -4,7 +4,8 @@ const guardianController = require('../controllers/GuardianController');
 const {VerifyRegistrationToken,VerifyGuardian} = require('../utils/Authenticate')
 
 router.post('/create',VerifyRegistrationToken,VerifyGuardian,guardianController.createGuardianAccount);
-router.delete('/:guardianId', guardianController.deleteGuardianById);
+router.post('/changepw',VerifyRegistrationToken,VerifyGuardian,guardianController.changePassword);
+router.delete('/:guardianId',VerifyRegistrationToken,VerifyGuardian, guardianController.deleteGuardianById);
 router.put('/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.updateGuardian);
 router.get('/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardianDetails);
 router.delete('/:guardianId/remove-child/:childId',VerifyRegistrationToken,VerifyGuardian, guardianController.removeChildFromGuardian);

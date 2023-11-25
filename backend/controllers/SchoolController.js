@@ -119,9 +119,18 @@ async function Login(req, res) {
   try {
     // Find the school by either 'branchName' or 'email'
     const school = await School.findOne({ $or: [{ branchName: identifier }, { email: identifier }] });
+    console.log(school.status)
 
-    if (!school) {
+    if (!school || school.status == 'unverified') {
       return res.status(404).json({ error: 'School not found' });
+    }
+
+    if (school.status == 'inactive') {
+      return res.status(404).json({ error: 'School is inactive. Contact admin' });
+    }
+
+    if (school.status == 'blocked') {
+      return res.status(404).json({ error: 'School is blocked by admin.' });
     }
 
     // Check the password using bcrypt
@@ -371,8 +380,42 @@ const getTotalSchoolCount = async (req,res) =>{
   }
 }
 
+const changePassword = async (req, res) => {
+  try {
+    const { schoolId, oldPassword, newPassword } = req.body;
+
+    // Find the school by ID
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      return res.status(404).json({ error: 'school not found.' });
+    }
+
+    // Check if the old password is correct
+    const isPasswordValid = await bcrypt.compare(oldPassword, school.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid old password.' });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the school's password
+    school.password = hashedNewPassword;
+
+    // Save the updated school to the database
+    await school.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 module.exports = {
 
-  getTotalSchoolCount,registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
+  changePassword,getTotalSchoolCount,registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
 };
