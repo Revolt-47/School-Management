@@ -110,11 +110,21 @@ async function Login(req, res) {
   password = password.trim();
 
   try {
-    // Find the school by either 'branchName' or 'email'
+
+
     const school = await School.findOne({ $or: [{ username: identifier }, { email: identifier }] });
 
-    if (!school) {
+
+    if (!school || school.status == 'unverified') {
       return res.status(404).json({ error: 'School not found' });
+    }
+
+    if (school.status == 'inactive') {
+      return res.status(404).json({ error: 'School is inactive. Contact admin' });
+    }
+
+    if (school.status == 'blocked') {
+      return res.status(404).json({ error: 'School is blocked by admin.' });
     }
 
     // Check the password using bcrypt
@@ -176,6 +186,31 @@ async function getAllSchools(req, res) {
     res.status(500).json({ error: 'An error occurred while fetching all schools' });
   }
 }
+
+async function getSchoolById(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Check if the ID is valid
+    if (!(id)) {
+      return res.status(400).json({ error: 'Invalid school ID' });
+    }
+
+    const school = await School.findById(id);
+
+    if (!school) {
+      return res.status(404).json({ error: 'School not found' });
+    }
+
+    // Send school details in the response
+    res.status(200).json({ school });
+  } catch (error) {
+    console.error(error);
+    // Send an error response
+    res.status(500).json({ error: 'An error occurred while fetching school details by ID' });
+  }
+}
+
 
 async function getSchoolsByStatus(req, res) {
   try {
@@ -327,8 +362,55 @@ async function deleteUnverifiedSchools() {
 // Schedule the task to run every day at a specific time (e.g., midnight)
 cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run every day at a specific time (e.g., midnight)
 
+const getTotalSchoolCount = async (req,res) =>{
+  try {
+    // Use the countDocuments method to get the total count of students
+    const totalSchoolCount = await School.countDocuments();
+
+    res.status(200).json({ totalSchoolCount });
+  } catch (error) {
+    console.error('Error getting total school count:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+const changePassword = async (req, res) => {
+  try {
+    const { schoolId, oldPassword, newPassword } = req.body;
+
+    // Find the school by ID
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      return res.status(404).json({ error: 'school not found.' });
+    }
+
+    // Check if the old password is correct
+    const isPasswordValid = await bcrypt.compare(oldPassword, school.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid old password.' });
+    }
+
+    // Hash the new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the school's password
+    school.password = hashedNewPassword;
+
+    // Save the updated school to the database
+    await school.save();
+
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 module.exports = {
-  registerSchool, verifyEmail, Login, getAllSchools, getSchoolsByStatus, changeSchoolStatusById, forgotPassword, resetPassword, updateTiming
+
+  changePassword,getTotalSchoolCount,registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming,getSchoolById
+
 };

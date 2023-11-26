@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const paymentSchema = new mongoose.Schema({
   school: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SchoolModel', // Assuming 'School' is the name of the school model
+    ref: 'School', 
     required: true,
   },
   amount: {
@@ -21,6 +21,11 @@ const paymentSchema = new mongoose.Schema({
   },
   referenceNumber: {
     type: String,
+  },
+  paymentType: {
+    type: String,
+    enum: ['Initial', 'Monthly'], // Add the two types of payments
+    required: true,
   },
 });
 
