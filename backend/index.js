@@ -7,6 +7,7 @@ const superAdminRouter = require('./routes/SuperAdminRouter');
 const mongoose = require('mongoose');
 const studentRouter = require('./routes/StudentRoute');
 const guardianRouter = require('./routes/GuardianRouter');
+const paymentRouter = require('./routes/PaymentRouter');
 cors = require("cors")
 
 app.use(cors({
@@ -14,6 +15,7 @@ app.use(cors({
 }))
 
 const dbUrl = 'mongodb+srv://revolt:revolt47@cluster0.rxk1sz1.mongodb.net/?retryWrites=true&w=majority'; // Replace with your actual database name
+// const dbUrl = 'mongodb://localhost:27017/VanGuardian';
 mongoose.connect(dbUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -35,7 +37,9 @@ app.use(express.json());
 app.use('/schools', schoolRouter);
 app.use('/superadmin',superAdminRouter);
 app.use('/students',studentRouter);
+app.use('/payments', paymentRouter);
 app.use('/guardian',guardianRouter);
+
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);

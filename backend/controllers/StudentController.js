@@ -1,4 +1,5 @@
-const Student = require('../models/StudentModel'); // Adjust the path based on your project structure
+const Student = require('../models/StudentModel');
+const School = require('../models/SchoolModel')
 
 // Function to add a new student
 const addStudent = async (req, res) => {
