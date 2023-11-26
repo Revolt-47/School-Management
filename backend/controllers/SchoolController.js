@@ -11,78 +11,69 @@ const moment = require('moment');
 
 async function registerSchool(req, res) {
   try {
-    // Check if the school already exists in the database by its email
-    const existingSchool = await School.findOne({ email: req.body.email });
+    const schoolData = req.body;
+
+    // Check if the school already exists in the database by its username or email
+    const existingSchool = await School.findOne({ $or: [{ username: schoolData.username }, { email: schoolData.email }] });
 
     if (existingSchool) {
-      // School is already registered, return its status
-      return res.status(200).json({ message: 'School already registered', status: existingSchool.status });
+      // School is already registered, return an appropriate error message
+      if (existingSchool.username === schoolData.username) {
+        return res.status(200).json({ success: false, message: 'School registration failed. Username already in use.', status: 'error' });
+      } else {
+        return res.status(406).json({ success: false, message: 'School registration failed. Email already in use.', status: 'error' });
+      }
     }
 
     // Create a new school instance based on the request data
-    const newSchool = new School({
-      branchName: req.body.branchName,
-      numberOfStudents: req.body.numberOfStudents,
-      address: req.body.address,
-      username: req.body.address,
-      city: req.body.city,
-      numberOfGates: req.body.numberOfGates,
-      email: req.body.email,
-      timings: req.body.timings,
-      status: req.body.status || 'unverified', // Default to 'unverified' if status is not provided
-    });
-
+    const newSchool = new School(schoolData);
+  
     // Check if the password is present in the request body
-    if (!req.body.password) {
-      return res.status(400).json({ error: 'Password is required.' });
+    if (!schoolData.password) {
+      return res.status(400).json({ success: false, error: 'Password is required.' });
     }
 
     // Encrypt the password before saving
     const saltRounds = 10; // Adjust the number of salt rounds as needed
+    const hashedPassword = await bcrypt.hash(schoolData.password.trim(), saltRounds);
+    newSchool.password = hashedPassword;
 
-    bcrypt.hash(req.body.password, saltRounds, async (err, hashedPassword) => {
-      if (err) {
-        console.error(err);
-        res.status(500).json({ error: 'An error occurred while hashing the password.' });
+    // Save the new school to the database
+    const savedSchool = await newSchool.save();
+
+    // Create a verification link with the school's ID
+    const verificationLink = `http://localhost:3001/verify-email/${savedSchool._id}`; // frontend link
+
+    // Send the verification link in the email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'amirdaniyal47@gmail.com',
+        pass: 'zucq jdwo iqwp wttd',
+      },
+    });
+
+    const mailOptions = {
+      from: 'amirdaniyal47@email.com',
+      to: req.body.email, // Assuming email is provided in the request body
+      subject: 'Verification Link for School Registration',
+      text: `Click on the following link to verify your registration: ${verificationLink}`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while sending the verification link.' });
       } else {
-        newSchool.password = hashedPassword;
-
-        // Save the new school to the database
-        const savedSchool = await newSchool.save();
-
-        // Create a verification link with the school's ID
-        const verificationLink = `http://localhost:3000/register-verify/${savedSchool._id}`;
-
-        // Send the verification link in the email
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: 'amirdaniyal47@gmail.com',
-            pass: 'zucq jdwo iqwp wttd',
-          },
-        });
-
-        const mailOptions = {
-          from: 'amirdaniyal47@email.com',
-          to: req.body.email, // Assuming email is provided in the request body
-          subject: 'Verification Link for School Registration',
-          text: `Click on the following link to verify your registration: ${verificationLink}`,
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error(error);
-            res.status(500).json({ error: 'An error occurred while sending the verification link.' });
-          } else {
-            console.log('Email sent: ' + info.response);
-            res.status(201).json("Check your email");
-          }
-        });
+        console.log('Email sent: ' + info.response);
+        res.status(201).json("Check your email");
       }
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'An error occurred while registering the school.' });
+
+    res.status(201).json({ success: true, message: 'Registration successful. Check your email.', status: 'success' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'An error occurred while registering the school.', status: 'error' });
   }
 }
 
@@ -105,7 +96,7 @@ async function verifyEmail(req, res) {
     school.status = 'verified';
     await school.save();
 
-    res.json({ message: 'School email verified successfully' });
+    res.status(200).json({ message: 'School email verified successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'An error occurred while verifying the email' });
@@ -114,23 +105,25 @@ async function verifyEmail(req, res) {
 
 
 async function Login(req, res) {
-  const { identifier, password } = req.body;
+  var { identifier, password } = req.body;
+  identifier = identifier.trim();
+  password = password.trim();
 
   try {
     // Find the school by either 'branchName' or 'email'
-    const school = await School.findOne({ $or: [{ branchName: identifier }, { email: identifier }] });
+    const school = await School.findOne({ $or: [{ username: identifier }, { email: identifier }] });
 
     if (!school) {
       return res.status(404).json({ error: 'School not found' });
     }
 
     // Check the password using bcrypt
-    if (!bcrypt.compareSync(password, school.password)) {
+    if (!bcrypt.compareSync(password, school.password.trim())) {
       return res.status(401).json({ error: 'Invalid password' });
     }
 
     // Generate a JWT token
-    const payload = { schoolId: school._id, username: school.branchName, email: school.email, role: 'school' };
+    const payload = { schoolId: school._id, username: school.username, email: school.email, role: 'school' };
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '72h' });
 
     // Return the token along with a success message
@@ -174,7 +167,7 @@ async function changeSchoolStatusById(req, res) {
 async function getAllSchools(req, res) {
   try {
     const schools = await School.find();
-    
+
     // Send schools in the response
     res.status(200).json({ schools });
   } catch (error) {
@@ -220,8 +213,8 @@ async function forgotPassword(req, res) {
   const expirationTime = Date.now() + 600000; // 10 minutes in milliseconds
 
   // Include the reset token and expiration time in the reset link
-  const resetLink = `http://localhost:3000/reset-password/${school._id}/${resetToken}/${expirationTime}`;
-  
+  const resetLink = `http://localhost:3001/reset-password/${school._id}/${resetToken}/${expirationTime}`;
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -249,7 +242,7 @@ async function forgotPassword(req, res) {
 
 async function resetPassword(req, res) {
   const { schoolId, resetToken, expirationTime, newPassword } = req.body;
-  
+
   // Find the school by ID
   const school = await School.findById(schoolId);
 
@@ -287,20 +280,20 @@ async function updateTiming(req, res) {
     // Check if the specified day exists in the timings array
     const dayIndex = school.timings.findIndex((timing) => timing.day === day);
 
-    
-if (dayIndex === -1) {
-  // If the day does not exist, add a new timing
-  school.timings.push({
-    day,
-    openTime: moment(openTime, 'hh:mm A').toDate(),
-    closeTime: moment(closeTime, 'hh:mm A').toDate(),
-  });
-} else {
-  // Update the open and close times if the day exists
-  school.timings[dayIndex].openTime = moment(openTime, 'hh:mm A').toDate();
-  school.timings[dayIndex].closeTime = moment(closeTime, 'hh:mm A').toDate();
-}
-    
+
+    if (dayIndex === -1) {
+      // If the day does not exist, add a new timing
+      school.timings.push({
+        day,
+        openTime: moment(openTime, 'hh:mm A').toDate(),
+        closeTime: moment(closeTime, 'hh:mm A').toDate(),
+      });
+    } else {
+      // Update the open and close times if the day exists
+      school.timings[dayIndex].openTime = moment(openTime, 'hh:mm A').toDate();
+      school.timings[dayIndex].closeTime = moment(closeTime, 'hh:mm A').toDate();
+    }
+
 
     // Save the changes
     await school.save();
@@ -337,5 +330,5 @@ cron.schedule('0 0 * * *', deleteUnverifiedSchools);// Schedule the task to run 
 
 
 module.exports = {
-  registerSchool,verifyEmail,Login,getAllSchools,getSchoolsByStatus,changeSchoolStatusById,forgotPassword,resetPassword,updateTiming
+  registerSchool, verifyEmail, Login, getAllSchools, getSchoolsByStatus, changeSchoolStatusById, forgotPassword, resetPassword, updateTiming
 };
