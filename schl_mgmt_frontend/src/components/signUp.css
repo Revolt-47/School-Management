@@ -1,0 +1,30 @@
+.step-indicator {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: grey; /* Default color */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    border: 2px solid white; /* Border color */
+  }
+  
+  .step-indicator.active {
+    background-color: purple; /* Active color */
+  }
+  
+  /* Additional styles for the line through steps and heading */
+  hr {
+    border: none;
+  }
+  
+  .form-container {
+    background-color: white;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  

@@ -14,6 +14,8 @@ app.use(cors({
   origin: "*"
 }))
 
+
+
 const dbUrl = 'mongodb+srv://revolt:revolt47@cluster0.rxk1sz1.mongodb.net/?retryWrites=true&w=majority'; // Replace with your actual database name
 // const dbUrl = 'mongodb://localhost:27017/VanGuardian';
 mongoose.connect(dbUrl, {
