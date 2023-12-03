@@ -7,7 +7,7 @@ router.post('/create',VerifyRegistrationToken,VerifyGuardian,guardianController.
 router.post('/changepw',VerifyRegistrationToken,VerifyGuardian,guardianController.changePassword);
 router.delete('/:guardianId',VerifyRegistrationToken,VerifyGuardian, guardianController.deleteGuardianById);
 router.put('/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.updateGuardian);
-router.get('/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardianDetails);
+router.post('/details/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardianDetails);
 router.delete('/:guardianId/remove-child/:childId',VerifyRegistrationToken,VerifyGuardian, guardianController.removeChildFromGuardian);
 router.post('/login', guardianController.loginGuardian);
 router.post('/forgot-password', guardianController.forgotPassword);

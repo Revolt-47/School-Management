@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const Guardian = require('../models/GuardianModel');
 const Student = require('../models/StudentModel');
+const School = require('../models/SchoolModel');
 const jwt  = require('jsonwebtoken')
 
 const createGuardianAccount = async (req, res) => { 
@@ -62,8 +63,6 @@ const createGuardianAccount = async (req, res) => {
         children: children || [],
       });
 
-      // Save the new guardian to the database
-      await newGuardian.save();
 
       // Send credentials over email using Node Mailer
       const randomPassword = crypto.randomBytes(8).toString('hex');
@@ -164,7 +163,20 @@ const getGuardianDetails = async (req, res) => {
     const { guardianId } = req.params;
 
     // Find the guardian by ID and populate the children details
-    const guardian = await Guardian.findById(guardianId).populate('children.child');
+    const guardian = await Guardian.findById(guardianId).populate({
+      path: 'children',
+      populate: {
+        path: 'child',
+        model: 'Student',
+        populate: {
+          path: 'school',
+          model: 'School',
+        },
+      },
+    });
+
+    
+    
 
     if (!guardian) {
       return res.status(404).json({ error: 'Guardian not found.' });
@@ -176,6 +188,7 @@ const getGuardianDetails = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 const removeChildFromGuardian = async (req, res) => {
   try {
@@ -227,9 +240,9 @@ const loginGuardian = async (req, res) => {
     }
 
     // Generate a token (you may want to use a more secure approach in a production environment)
-    const token = jwt.sign({ guardianId: guardian._id, role:"guardian" },process.env.SECRET, { expiresIn: '72h' });
+    const token = jwt.sign({ guardianId: guardian._id, role:"guardian" },process.env.SECRET, { expiresIn: '172h' });
 
-    res.status(200).json({ token });
+    res.status(200).json({ token,guradianId : guardian._id });
   } catch (error) {
     console.error('Error logging in guardian:', error);
     res.status(500).json({ error: 'Internal Server Error' });

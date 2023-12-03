@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 
 const schoolSchema = new mongoose.Schema({
+<<<<<<< Updated upstream
+=======
+  username: {
+    type: String,
+    unique: true,
+  },
+>>>>>>> Stashed changes
   branchName: {
     type: String,
     required: true,
@@ -8,10 +15,10 @@ const schoolSchema = new mongoose.Schema({
   },
   numberOfStudents: {
     type: Number,
-    default:0,
+    default: 0,
   },
   address: {
-    type: String, // We can store the Google Maps location as a string
+    type: String,
     required: true,
   },
   city: {
@@ -28,31 +35,30 @@ const schoolSchema = new mongoose.Schema({
     default: "unverified",
     enum: ["unverified", "verified", "active", "inactive", "blocked"],
   },
-  email : {
+  email: {
     type: String,
     required: true,
-    unique : true,
+    unique: true,
   },
-  password : {
+  password: {
     type: String,
     required: true,
   },
   timings: [
     {
       day: {
-        type: String, // E.g., "Monday"
+        type: String,
         required: true,
       },
       openTime: {
-        type: Date, // Store open time as a Date object
+        type: Date,
         required: true,
       },
       closeTime: {
-        type: Date, // Store close time as a Date object
+        type: Date,
         required: true,
       },
     },
-
   ],
 });
 
