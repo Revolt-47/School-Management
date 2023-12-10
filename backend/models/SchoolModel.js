@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
 
 const schoolSchema = new mongoose.Schema({
-<<<<<<< Updated upstream
-=======
   username: {
     type: String,
     unique: true,
   },
->>>>>>> Stashed changes
   branchName: {
     type: String,
     required: true,

@@ -192,14 +192,16 @@ const getGuardianDetails = async (req, res) => {
 
 const removeChildFromGuardian = async (req, res) => {
   try {
-    const { guardianId, childId } = req.params;
+    const { guardianId, childId } = req.body;
 
-    // Find the guardian by ID
+    console.log(req.body);
     const guardian = await Guardian.findById(guardianId);
 
     if (!guardian) {
       return res.status(404).json({ error: 'Guardian not found.' });
     }
+
+    console.log(guardian)
 
     // Check if the childId exists in the guardian's children array
     const childToRemoveIndex = guardian.children.findIndex(child => child.child.equals(childId));
@@ -353,6 +355,30 @@ async function resetPassword(req, res) {
   res.status(200).json({ message: 'Password reset successful' });
 }
 
+async function getGuardians(req,res){
+  try {
+    const studentId = req.params.studentId;
+
+    // Find the student by ID
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    // Find guardians who are the guardians of the given student with relation 'guardian'
+    const guardians = await Guardian.find({
+      'children.child': studentId,
+      'children.relation': 'guardian',
+    });
+
+    res.json(guardians);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 
 module.exports = {
   createGuardianAccount,
@@ -363,5 +389,6 @@ module.exports = {
   loginGuardian,
   forgotPassword,
   resetPassword,
-  changePassword
+  changePassword,
+  getGuardians
 };

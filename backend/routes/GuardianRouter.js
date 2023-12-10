@@ -8,9 +8,10 @@ router.post('/changepw',VerifyRegistrationToken,VerifyGuardian,guardianControlle
 router.delete('/:guardianId',VerifyRegistrationToken,VerifyGuardian, guardianController.deleteGuardianById);
 router.put('/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.updateGuardian);
 router.post('/details/:guardianId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardianDetails);
-router.delete('/:guardianId/remove-child/:childId',VerifyRegistrationToken,VerifyGuardian, guardianController.removeChildFromGuardian);
+router.post('/remove-child',VerifyRegistrationToken,VerifyGuardian, guardianController.removeChildFromGuardian);
 router.post('/login', guardianController.loginGuardian);
 router.post('/forgot-password', guardianController.forgotPassword);
 router.post('/reset-password', guardianController.resetPassword);
+router.post('/getguardian/:studentId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardians);
 
 module.exports = router;
