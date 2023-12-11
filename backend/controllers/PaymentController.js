@@ -21,21 +21,9 @@ const calculateMonthlySubscriptionAmount = async (schoolId) => {
     }
   };
 
-const createPaymentIntent = async (amount, currency) => {
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-    });
-
-    return paymentIntent;
-  } catch (error) {
-    console.error('Error creating payment intent:', error);
-    throw error;
-  }
-};
 
 const handleSuccessfulPayment = async (schoolId, amount, paymentMethod, referenceNumber, paymentType) => {
+  console.log(schoolId)
   try {
     const payment = new Payment({
       school: schoolId,
@@ -55,6 +43,50 @@ const handleSuccessfulPayment = async (schoolId, amount, paymentMethod, referenc
   }
 };
 
+const createPaymentIntent = async (amount, currency, schoolId) => {
+  try {
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      console.error('School not found for ID:', schoolId);
+      throw new Error('School not found');
+    }
+
+    // Check if the customer (school) exists in Stripe
+    let customer = await stripe.customers.list({
+      email: school.email,
+      limit: 1,
+    });
+
+    if (customer.data.length === 0) {
+      // If the customer doesn't exist, create a new customer in Stripe
+      customer = await stripe.customers.create({
+        email: school.email,
+        // Add additional information if needed
+      });
+    } else {
+      // If the customer exists, get the first customer from the list
+      customer = customer.data[0];
+    }
+
+    // Create a PaymentIntent with the customer ID
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      customer: customer.id,
+    });
+
+    return paymentIntent;
+  } catch (error) {
+    console.error('Error creating PaymentIntent:', error);
+    throw error;
+  }
+};
+
+
+
+
+
 const createInitialPayment = async (req, res) => {
   try {
     const { schoolId} = req.body;
@@ -65,12 +97,22 @@ const createInitialPayment = async (req, res) => {
       return res.status(404).json({ error: 'School not found.' });
     }
 
+    const existingInitialPayment = await Payment.findOne({
+      school: school._id,
+      paymentType: 'Initial',
+    });
+
+    if (existingInitialPayment) {
+      // If an initial payment already exists, return its client secret
+      return res.status(200).json({ clientSecret: existingInitialPayment.clientSecret });
+    }
+
     // Calculate the initial amount
     const amount = await calculateInitialAmount(school.numberOfGates);
     console.log(amount)
 
     // Create a payment intent with Stripe
-    const paymentIntent = await createPaymentIntent(amount, 'usd');
+    const paymentIntent = await createPaymentIntent(amount, 'pkr',schoolId);
 
     // Return client secret to confirm the payment on the client side
     res.status(200).json({ clientSecret: paymentIntent.client_secret });
@@ -84,8 +126,15 @@ const handleSuccessfulInitialPayment = async (req, res) => {
   try {
     const { schoolId, numGates, paymentMethod, referenceNumber } = req.body;
 
+
+    // Check if the school exists
+    const school = await School.findById(schoolId);
+    if (!school) {
+      return res.status(404).json({ error: 'School not found.' });
+    }
+
     // Calculate the initial amount
-    const amount = await calculateInitialAmount(numGates);
+    const amount = await calculateInitialAmount(school.numberOfGates);
 
     // Handle the successful payment
     const payment = await handleSuccessfulPayment(schoolId, amount, paymentMethod, referenceNumber, 'Initial');

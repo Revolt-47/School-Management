@@ -1,126 +1,74 @@
-// import React, { useState, useEffect } from 'react';
-// import { loadStripe } from '@stripe/stripe-js';
-// import { CardElement, Elements } from '@stripe/react-stripe-js';
-// import { useParams } from 'react-router-dom';
-// import { Button, Paper, Typography, CircularProgress } from '@mui/material';
-// import { makeStyles } from '@mui/material';
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import { useParams } from "react-router-dom";
+import CheckoutForm from "./CheckoutForm";
+import Modal from "react-modal";
+import "./Payment.css";
 
-// const stripePromise = loadStripe('pk_test_51N5kWcEdXzoBMsb81YwUtTSuUrlQcxIo0oSYbKbJ70WQW6l1u5HvrPO3kt0zEPnoLNiIqI5Mpiu4Xw7TSpGHDVwn00z7UbSu1c');
+Modal.setAppElement("#root"); // Set the root element for accessibility
 
-// const useStyles = makeStyles((theme) => ({
-//   paymentFormContainer: {
-//     display: 'flex',
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//     padding: theme.spacing(3),
-//     marginTop: theme.spacing(3),
-//   },
-//   paymentForm: {
-//     width: '100%',
-//     maxWidth: 400,
-//     padding: theme.spacing(3),
-//     display: 'flex',
-//     flexDirection: 'column',
-//     alignItems: 'center',
-//   },
-//   cardElement: {
-//     marginTop: theme.spacing(2),
-//   },
-//   payButton: {
-//     marginTop: theme.spacing(2),
-//   },
-// }));
+const stripePromise = loadStripe("pk_test_51N5kWcEdXzoBMsb81YwUtTSuUrlQcxIo0oSYbKbJ70WQW6l1u5HvrPO3kt0zEPnoLNiIqI5Mpiu4Xw7TSpGHDVwn00z7UbSu1c");
 
-// const PaymentForm = () => {
-//   const [clientSecret, setClientSecret] = useState('');
-//   const [loading, setLoading] = useState(true);
-//   const { schoolId } = useParams();
-//   const classes = useStyles();
+export default function PaymentForm() {
+  const [clientSecret, setClientSecret] = useState("");
+  const { schoolId } = useParams();
+  const [isDialogOpen, setIsDialogOpen] = useState(true);
 
-//   useEffect(() => {
-//     const fetchClientSecret = async () => {
-//       try {
-//         const response = await fetch('http://localhost:3000/payments/initial-payment', {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//           body: JSON.stringify({
-//             schoolId: schoolId,
-//           }),
-//         });
+  useEffect(() => {
+    fetch(`http://localhost:3000/payments/initial-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        schoolId: schoolId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => setClientSecret(data.clientSecret));
+  }, [schoolId]);
 
-//         const data = await response.json();
-//         setClientSecret(data.clientSecret);
-//         setLoading(false);
-//       } catch (error) {
-//         console.error('Error fetching client secret:', error);
-//       }
-//     };
+  const appearance = {
+    theme: "stripe",
+  };
+  const options = {
+    clientSecret,
+    appearance,
+    elements: {
+      card: {
+        hidePostalCode: true, // Hide the postal code field
+      },
+    },
+    features: {
+      card: { checkout: false }, // Disable the 1-click checkout feature
+    },
+  };
 
-//     fetchClientSecret();
-//   }, [schoolId]);
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
 
-//   const handleSuccessfulInitialPayment = async () => {
-//     try {
-//       // Make a request to your server to handle successful initial payment
-//       const response = await fetch('http://localhost:3000/payments/handle-successful-initial-payment', {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({
-//           schoolId: schoolId,
-//           numGates: 2, // Example value, replace with your actual data
-//           clientSecret: clientSecret,
-//           paymentMethod: 'Card', // Example value, replace with your actual data
-//         }),
-//       });
-
-//       const data = await response.json();
-
-//       // Show success toast
-//       toast.success('Payment successful!');
-
-//       console.log('Payment success:', data);
-//     } catch (error) {
-//       console.error('Error handling successful initial payment:', error);
-
-//       // Show error toast
-//       toast.error('Payment failed. Please try again.');
-//     }
-//   };
-
-//   return (
-//     <Elements stripe={stripePromise}>
-//       <Paper elevation={3} className={classes.paymentFormContainer}>
-//         <ToastContainer position="top-center" autoClose={5000} />
-//         <Typography variant="h4" gutterBottom>
-//           VanGuardian
-//         </Typography>
-//         <Paper elevation={1} className={classes.paymentForm}>
-//           {loading ? (
-//             <CircularProgress />
-//           ) : (
-//             <>
-//               <Typography variant="h6">Initial Payment</Typography>
-//               <CardElement className={classes.cardElement} />
-//               <Button
-//                 variant="contained"
-//                 color="primary"
-//                 className={classes.payButton}
-//                 onClick={handleSuccessfulInitialPayment}
-//               >
-//                 Confirm Payment
-//               </Button>
-//             </>
-//           )}
-//         </Paper>
-//       </Paper>
-//     </Elements>
-//   );
-// };
-
-// export default PaymentForm;
+  return (
+    <div className="App">
+      {clientSecret && (
+        <>
+          <Modal
+            isOpen={isDialogOpen}
+            onRequestClose={handleCloseDialog}
+            contentLabel="Initial Payment Dialog"
+            className="custom-modal" // Apply custom styles
+            overlayClassName="custom-overlay" // Apply custom styles to overlay
+          >
+            <h2>Initial Payment</h2>
+            <p>It's an initial payment calculated based on the number of gates of your school.</p>
+            <p>To continue further, please proceed with the initial payment.</p>
+            <button onClick={handleCloseDialog}>Close</button>
+          </Modal>
+          <Elements options={options} stripe={stripePromise}>
+            {/* Pass clientSecret as a prop to CheckoutForm */}
+            <CheckoutForm clientSecret={clientSecret} schoolId={schoolId} />
+          </Elements>
+        </>
+      )}
+    </div>
+  );
+}

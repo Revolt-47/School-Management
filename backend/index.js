@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const studentRouter = require('./routes/StudentRoute');
 const guardianRouter = require('./routes/GuardianRouter');
 const paymentRouter = require('./routes/PaymentRouter');
+const driverRouter = require('./routes/DriverRouter');
 cors = require("cors")
 
 app.use(cors({
@@ -41,6 +42,7 @@ app.use('/superadmin',superAdminRouter);
 app.use('/students',studentRouter);
 app.use('/payments', paymentRouter);
 app.use('/guardian',guardianRouter);
+app.use('/driver',driverRouter);
 
 
 app.listen(port, () => {

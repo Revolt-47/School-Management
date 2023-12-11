@@ -20,6 +20,19 @@ const vehicleSchema = new mongoose.Schema({
   },
 });
 
+const studentDriverRelationSchema = new mongoose.Schema({
+  student: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true,
+  },
+  relation: {
+    type: String,
+    enum: ['pickup', 'dropoff', 'both'],
+    required: true,
+  },
+});
+
 const driverSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -43,12 +56,13 @@ const driverSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  school: {
+  schools: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'School', // Assuming you have a School model
+    ref: 'School',
     required: true,
-  },
+  }],
   vehicles: [vehicleSchema],
+  students: [studentDriverRelationSchema],
 });
 
 const Driver = mongoose.model('Driver', driverSchema);

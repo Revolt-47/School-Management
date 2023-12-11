@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 let VerifyRegistrationToken = (req, res, next) => {
     let token = req.body.token;
+    console.log(token)
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
     }
@@ -9,6 +10,7 @@ let VerifyRegistrationToken = (req, res, next) => {
         jwt.verify(token, process.env.SECRET, (err, decoded) => {
             if (err) {
                 res.status(401).json({ "Success": false, "Message": "Invalid token" });
+                console.log(err)
             }
             else {
                 req.decoded = decoded;
@@ -40,6 +42,7 @@ let VerifyAdmin = (req, res, next) => {
 }
 
 let VerifyGuardian= (req, res, next) => {
+    console.log(req.decoded.role)
     if (req.decoded.role == "guardian" || req.decoded.role == "school") {
         next();
     }
