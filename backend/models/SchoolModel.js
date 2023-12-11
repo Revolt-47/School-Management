@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const schoolSchema = new mongoose.Schema({
+
   username: {
     type: String,
     unique: true,
@@ -8,7 +9,6 @@ const schoolSchema = new mongoose.Schema({
   branchName: {
     type: String,
     required: true,
-    unique: true,
   },
   numberOfStudents: {
     type: Number,
