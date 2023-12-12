@@ -379,6 +379,41 @@ async function getGuardians(req,res){
   }
 }
 
+const getAllGuardians = async (req, res) => {
+  try {
+    const guardians = await Guardian.find();
+    res.json(guardians);
+  } catch (error) {
+    console.error('Error fetching all guardians:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const assignChildToGuardian = async (req, res) => {
+  try {
+    const { guardianId, children } = req.body;
+
+    // Find the guardian by ID
+    const guardian = await Guardian.findById(guardianId);
+
+    if (!guardian) {
+      return res.status(404).json({ error: 'Guardian not found.' });
+    }
+
+    // Assign children to the guardian
+    children.forEach((childId) => {
+      guardian.children.push({ child: childId, relation: 'guardian' });
+    });
+
+    // Save the updated guardian to the database
+    await guardian.save();
+
+    res.status(200).json({ message: 'Children assigned to the guardian successfully.' });
+  } catch (error) {
+    console.error('Error assigning children to guardian:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 module.exports = {
   createGuardianAccount,
@@ -390,5 +425,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   changePassword,
-  getGuardians
+  getGuardians,
+  getAllGuardians,
+  assignChildToGuardian,
 };

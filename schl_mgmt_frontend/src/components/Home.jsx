@@ -1,4 +1,5 @@
 import Student from "./Student";
+import Guardian from "./Guardian";
 
 const containerStyle = {
   display: 'flex',
@@ -13,6 +14,7 @@ function Home() {
       <h1>Home Component</h1>
     </div>
       <Student />
+      <Guardian />
     </>
   );
 }

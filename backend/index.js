@@ -57,7 +57,7 @@ app.use('/schools', schoolRouter);
 app.use('/superadmin',superAdminRouter);
 app.use('/students',studentRouter);
 app.use('/payments', paymentRouter);
-app.use('/guardian',guardianRouter);
+app.use('/guardians',guardianRouter);
 app.use('/driver',driverRouter);
 
 
