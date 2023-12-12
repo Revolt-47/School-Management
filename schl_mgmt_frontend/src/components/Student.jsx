@@ -72,10 +72,10 @@ const Student = () => {
         ? `http://localhost:3000/students/edit/${selectedStudentId}`
         : 'http://localhost:3000/students/add';
   
-      console.log('Request Options:', requestOptions);  // Log request options
+      //console.log('Request Options:', requestOptions);  // Log request options
   
       const response = await fetch(apiUrl, requestOptions);
-      console.log('Response:', response);  // Log the response
+      //console.log('Response:', response);  // Log the response
   
       handleModalClose();
       fetchStudents();

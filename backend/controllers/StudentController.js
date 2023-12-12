@@ -71,7 +71,7 @@ const deleteStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const { rfidTag, studentClass, section } = req.body;
+    const { name,cnic, rollNumber, rfidTag, studentClass, section } = req.body;
 
     // Check if the student exists
     const existingStudent = await Student.findById(studentId);
@@ -89,6 +89,10 @@ const updateStudent = async (req, res) => {
     }
     
     existingStudent.section = section || existingStudent.section;
+    existingStudent.name = name || existingStudent.name;
+    existingStudent.cnic = cnic || existingStudent.cnic;
+    existingStudent.rollNumber = rollNumber || existingStudent.rollNumber;
+    
     // Save the updated student to the database
     await existingStudent.save();
 
