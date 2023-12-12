@@ -1,30 +1,35 @@
 const jwt = require('jsonwebtoken');
 
 let VerifyRegistrationToken = (req, res, next) => {
-    let token = req.body.token;
-    console.log(token)
+    let token = req.headers.authorization;
+
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
-    }
-    else {
+    } else {
+        // Extract the token from the "Bearer" prefix
+        token = token.split(' ')[1];
+
         jwt.verify(token, process.env.SECRET, (err, decoded) => {
             if (err) {
                 res.status(401).json({ "Success": false, "Message": "Invalid token" });
-                console.log(err)
-            }
-            else {
+                console.log(err);
+            } else {
                 req.decoded = decoded;
+                console.log("Decoded token: ");
+                console.log(decoded);
                 next();
             }
         });
     }
-}
+};
+
 
 
 
 
 let VerifySchool = (req, res, next) => {
     if (req.decoded.role == "school") {
+        console.log("Role of user: "+req.decoded.role)
         next();
     }
     else {

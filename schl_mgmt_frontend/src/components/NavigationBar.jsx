@@ -7,24 +7,20 @@ import SignUp from './SignUp';
 import ForgotPassword from './ForgotPass';
 import EmailVerification from './EmailVerification';
 import ResetPassword from './ResetPassword';
-import Cookies from 'js-cookie'; // Import js-cookie
-
+import Cookies from 'js-cookie';
 
 function NavBar() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const navigate = useNavigate(); // Import the useNavigate hook
-  
-  useEffect(() => {
-    // Check if the token is present in your preferred way (e.g., from local storage)
-    const token = Cookies.get('token');
-    
-    setAuthenticated(!!token); // Set authentication status based on the presence of the token
+  const [authenticated, setAuthenticated] = useState(!!Cookies.get('token'));
+  const navigate = useNavigate();
 
+  const updateAuthenticationStatus = (status) => {
+    setAuthenticated(status);
+  };
+
+  useEffect(() => {
     if (!authenticated) {
-      // If not authenticated, redirect to the login page
       navigate('/signIn');
     }
-    
   }, [authenticated, navigate]);
 
   const navLinksStyle = {
@@ -51,7 +47,7 @@ function NavBar() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/signIn/*" element={<SignIn />} />
+        <Route path="/signIn" element={<SignIn updateAuthenticationStatus={updateAuthenticationStatus} />} />
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email/:schoolId" element={<EmailVerification />} />

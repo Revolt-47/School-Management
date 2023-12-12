@@ -133,7 +133,9 @@ async function Login(req, res) {
     }
 
     // Generate a JWT token
-    const payload = { schoolId: school._id, username: school.username, email: school.email, role: 'school' };
+    const payload = { schoolId: school._id.toString(), username: school.username, email: school.email, role: 'school' };
+    console.log("Payload in token is : ");
+    console.log(payload);
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '72h' });
 
     // Return the token along with a success message

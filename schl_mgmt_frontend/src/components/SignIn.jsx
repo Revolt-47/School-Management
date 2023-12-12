@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import { Link, useNavigate  } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import image from '../van guardian logo.png';
-import Cookies from 'js-cookie'; // Import js-cookie
+import Cookies from 'js-cookie';
 
 const containerStyle = {
   display: "flex",
@@ -22,16 +22,15 @@ const rightHalfStyle = {
   marginRight: "-100px"
 }
 
-function SignInPage() {
+function SignInPage({ updateAuthenticationStatus }) {
   const [apiResponse, setApiResponse] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Import the useNavigate hook
-
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       const response = await fetch('http://localhost:3000/schools/Login', {
         method: 'POST',
@@ -43,28 +42,22 @@ function SignInPage() {
           password: e.target.password.value,
         }),
       });
-  
+
       const data = await response.json();
-  
-      // Update component state with API response
+
       setApiResponse(data);
-  
+
       if (response.ok) {
-        // Store the token in a cookie
-        Cookies.set('token', data.token, { expires: 7 }); // You can adjust the expiration as needed
-  
-        // Redirect to a protected route or perform other actions
-        // For example, redirect to the home page
-        
+        Cookies.set('token', data.token, { expires: 7 });
+        updateAuthenticationStatus(true);
+        navigate('/home');
       }
-      navigate('/home');
     } catch (error) {
       console.error('Error during API request:', error);
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <main style={containerStyle}>
@@ -92,8 +85,8 @@ function SignInPage() {
                   <Form.Group controlId="formBasicCheckbox" className="d-flex align-items-center mb-4 justify-content-between">
                     <Form.Check type="checkbox" label="Remember me" />
                     <p style={{ fontSize: '15px', marginBottom: '0' }}>
-              <Link to="/forgot-password" style={{ color: 'black' }}>Forgot Password?</Link>
-            </p>
+                      <Link to="/forgot-password" style={{ color: 'black' }}>Forgot Password?</Link>
+                    </p>
                   </Form.Group>
 
                   <Button variant="dark" type="submit" className="mb-4" style={{ width: '100%' }}>
