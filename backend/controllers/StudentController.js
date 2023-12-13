@@ -3,6 +3,10 @@ const Student = require('../models/StudentModel');
 const School = require('../models/SchoolModel');
 
 // Function to add a new student
+// ...
+
+// Function to add a new student
+// Function to add a new student
 const addStudent = async (req, res) => {
   try {
     const { name, cnic, rollNumber, rfidTag, section, studentClass } = req.body;
@@ -22,7 +26,7 @@ const addStudent = async (req, res) => {
       } else if (existingStudent.rfidTag === rfidTag) {
         duplicateField = 'RFID Tag';
       }
-      return res.status(400).json({ error: `Student with the same ${duplicateField} already exists.` });
+      return res.status(400).json({ error: `Duplicate key violation. Student with the same ${duplicateField} already exists.`, duplicateField });
     }
 
     // Create a new student with the retrieved schoolId
@@ -59,11 +63,13 @@ const addStudent = async (req, res) => {
       } else if (error.keyPattern.rfidTag) {
         duplicateField = 'RFID Tag';
       }
-      return res.status(409).json({ error: `Duplicate key violation. Student with the same ${duplicateField} already exists.` });
+      return res.status(409).json({ error: `Duplicate key violation. Student with the same ${duplicateField} already exists.`, duplicateField });
     }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
 
 // Function to delete a student
 const deleteStudent = async (req, res) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Table, Button, Modal, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 
 const Student = () => {
@@ -15,6 +15,8 @@ const Student = () => {
   });
 
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -35,8 +37,6 @@ const Student = () => {
     }
   };
 
-  const handleModalShow = () => setShowModal(true);
-
   const handleModalClose = () => {
     setShowModal(false);
     setFormData({
@@ -48,6 +48,8 @@ const Student = () => {
       studentClass: '',
     });
     setSelectedStudentId(null);
+    setError(null);
+    setSuccessMessage(null);
   };
 
   const handleFormChange = (e) => {
@@ -57,6 +59,7 @@ const Student = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const token = Cookies.get('token');
       const requestOptions = {
@@ -67,44 +70,40 @@ const Student = () => {
         },
         body: JSON.stringify(formData),
       };
-  
+
       const apiUrl = selectedStudentId
         ? `http://localhost:3000/students/edit/${selectedStudentId}`
         : 'http://localhost:3000/students/add';
-  
+
       const response = await fetch(apiUrl, requestOptions);
-  
+      const result = await response.json();
+
       if (!response.ok) {
         // Check for duplicate key violation
         if (response.status === 409) {
-          // Parse the response body as JSON
-          const responseBody = await response.json();
-          // Display alert for duplicate key violation
-          alert(responseBody.error);
+          setError(result.error);
         } else {
-          // Handle other errors (you may want to display a more specific message)
-          alert('An error occurred while adding/updating student. Please try again later.');
+          // Handle other errors
+          setError('An error occurred while adding/updating student. Please try again later.');
         }
         return; // Do not proceed further on error
       }
-  
+
+      setSuccessMessage(result.message);
+
+      // Close the modal and fetch updated students on success
       handleModalClose();
       fetchStudents();
     } catch (error) {
       console.error('Error adding/updating student:', error);
-      alert('An unexpected error occurred. Please try again later.');
+      setError('An unexpected error occurred. Please try again later.');
     }
   };
-  
-  
-  
-  
-  
 
   const handleEdit = (studentId) => {
     const selectedStudent = students.find((student) => student._id === studentId);
     setSelectedStudentId(studentId);
-  
+
     // Create a new object with all fields
     const editedFormData = {
       name: selectedStudent.name,
@@ -114,11 +113,11 @@ const Student = () => {
       section: selectedStudent.section,
       studentClass: selectedStudent.studentClass,
     };
-  
+
     setFormData(editedFormData);
-    handleModalShow();
+    setShowModal(true);
+    setError(null); // Clear error on modal show
   };
-  
 
   const handleDelete = async (studentId) => {
     try {
@@ -139,7 +138,7 @@ const Student = () => {
     <Container className="mt-5">
       <Row>
         <Col>
-          <Button variant="primary" onClick={handleModalShow}>
+          <Button variant="primary" onClick={() => setShowModal(true)}>
             Add Student
           </Button>
         </Col>
@@ -193,6 +192,8 @@ const Student = () => {
           <Modal.Title>{selectedStudentId ? 'Edit Student' : 'Add Student'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {error && <Alert variant="danger">{error}</Alert>}
+          {successMessage && <Alert variant="success">{successMessage}</Alert>}
           <Form onSubmit={handleFormSubmit}>
             <Form.Group controlId="formName">
               <Form.Label>Name</Form.Label>
