@@ -126,7 +126,7 @@ const deleteGuardianById = async (req, res) => {
 const updateGuardian = async (req, res) => {
   try {
     const { guardianId } = req.params;
-    const { address, contactNumber, email } = req.body;
+    const { name, cnic, address, contactNumber, email, children } = req.body;
 
     // Find the guardian by ID
     const guardianToUpdate = await Guardian.findById(guardianId);
@@ -136,6 +136,14 @@ const updateGuardian = async (req, res) => {
     }
 
     // Update guardian information
+    if (name) {
+      guardianToUpdate.name = name;
+    }
+
+    if (cnic) {
+      guardianToUpdate.cnic = cnic;
+    }
+
     if (address) {
       guardianToUpdate.address = address;
     }
@@ -148,6 +156,11 @@ const updateGuardian = async (req, res) => {
       guardianToUpdate.email = email;
     }
 
+    // Update children information
+    if (children && Array.isArray(children)) {
+      // Your logic to update children array here
+    }
+
     // Save the updated guardian to the database
     await guardianToUpdate.save();
 
@@ -157,6 +170,7 @@ const updateGuardian = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 const getGuardianDetails = async (req, res) => {
   try {

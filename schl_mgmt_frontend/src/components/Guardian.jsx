@@ -89,7 +89,7 @@ const Guardian = () => {
   
       const response = await fetch(apiUrl, requestOptions);
       const result = await response.json();
-  
+      console.log(result);
       // If the guardian was created or updated successfully, assign children
       if (result.message === 'Guardian account created successfully.' || result.message === 'Guardian updated successfully.') {
         // Assign children only if formData.children is not empty
@@ -119,8 +119,12 @@ const Guardian = () => {
   };
 
   const handleSelectChildren = (selectedChildren) => {
-    setFormData((prevData) => ({ ...prevData, children: selectedChildren }));
+    setFormData((prevData) => ({
+      ...prevData,
+      children: selectedChildren,
+    }));
   };
+  
 
   const handleModalShow = () => setShowModal(true);
 
@@ -132,11 +136,12 @@ const Guardian = () => {
       address: selectedGuardian.address,
       contactNumber: selectedGuardian.contactNumber,
       email: selectedGuardian.email,
-      children: selectedGuardian.children,
+      children: selectedGuardian.children, 
     });
     setSelectedGuardianId(guardianId);
     setShowModal(true);
   };
+  
 
   const handleDelete = async (guardianId) => {
     try {
@@ -286,6 +291,7 @@ const Guardian = () => {
     <div>No students available.</div>
   )}
 </Form.Group>
+
 
 
 
