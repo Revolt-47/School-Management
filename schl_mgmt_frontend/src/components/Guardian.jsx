@@ -82,11 +82,11 @@ const Guardian = () => {
         },
         body: JSON.stringify(formData),
       };
-  
+
       const apiUrl = selectedGuardianId
         ? `http://localhost:3000/guardians/${selectedGuardianId}`
         : 'http://localhost:3000/guardians/create';
-  
+
       const response = await fetch(apiUrl, requestOptions);
       const result = await response.json();
       console.log(result);
@@ -105,11 +105,11 @@ const Guardian = () => {
               children: formData.children,
             }),
           };
-  
+
           // Call the new route to assign children to the guardian
           await fetch('http://localhost:3000/guardians/assign-child', assignChildrenRequestOptions);
         }
-  
+
         handleModalClose();
         fetchGuardians();
       }
@@ -124,7 +124,7 @@ const Guardian = () => {
       children: selectedChildren,
     }));
   };
-  
+
 
   const handleModalShow = () => setShowModal(true);
 
@@ -136,12 +136,12 @@ const Guardian = () => {
       address: selectedGuardian.address,
       contactNumber: selectedGuardian.contactNumber,
       email: selectedGuardian.email,
-      children: selectedGuardian.children, 
+      children: selectedGuardian.children,
     });
     setSelectedGuardianId(guardianId);
     setShowModal(true);
   };
-  
+
 
   const handleDelete = async (guardianId) => {
     try {
@@ -270,27 +270,27 @@ const Guardian = () => {
               />
             </Form.Group>
             <Form.Group controlId="formChildren">
-  <Form.Label>Children</Form.Label>
-  {students && students.length > 0 ? (
-    students.map((student) => (
-      <Form.Check
-        key={student._id}
-        type="checkbox"
-        label={student.name}
-        value={student._id}
-        checked={formData.children.includes(student._id)}
-        onChange={(e) => {
-          const selectedChildren = e.target.checked
-            ? [...formData.children, e.target.value]
-            : formData.children.filter((id) => id !== e.target.value);
-          handleSelectChildren(selectedChildren);
-        }}
-      />
-    ))
-  ) : (
-    <div>No students available.</div>
-  )}
-</Form.Group>
+              <Form.Label>Children</Form.Label>
+              {students && students.length > 0 ? (
+                students.map((student) => (
+                  <Form.Check
+                    key={student._id}
+                    type="checkbox"
+                    label={student.name}
+                    value={student._id}
+                    checked={formData.children.includes(student._id)}
+                    onChange={(e) => {
+                      const selectedChildren = e.target.checked
+                        ? [...formData.children, e.target.value]
+                        : formData.children.filter((id) => id !== e.target.value);
+                      handleSelectChildren(selectedChildren);
+                    }}
+                  />
+                ))
+              ) : (
+                <div>No students available.</div>
+              )}
+            </Form.Group>
 
 
 

@@ -15,7 +15,7 @@ router.post('/reset-password', guardianController.resetPassword);
 router.post('/getguardian/:studentId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardians);
 
 router.get('/getAllGuardians', VerifyRegistrationToken,VerifySchool, guardianController.getAllGuardians);
-// Add this route in your routes file (GuardianRoutes.js)
+
 router.post('/assign-child', VerifyRegistrationToken, VerifyGuardian, guardianController.assignChildToGuardian);
 
 module.exports = router;
