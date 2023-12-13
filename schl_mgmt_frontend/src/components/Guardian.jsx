@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Table, Button, Modal, Form } from 'react-bootstrap';
+import { Container, Row, Col, Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 
 const Guardian = () => {
@@ -16,6 +16,7 @@ const Guardian = () => {
   });
 
   const [selectedGuardianId, setSelectedGuardianId] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchGuardians();
@@ -63,6 +64,7 @@ const Guardian = () => {
       children: [],
     });
     setSelectedGuardianId(null);
+    setError(null); // Clear error on modal close
   };
 
   const handleFormChange = (e) => {
@@ -72,6 +74,7 @@ const Guardian = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+  
     try {
       const token = Cookies.get('token');
       const requestOptions = {
@@ -82,17 +85,29 @@ const Guardian = () => {
         },
         body: JSON.stringify(formData),
       };
-
+  
       const apiUrl = selectedGuardianId
         ? `http://localhost:3000/guardians/${selectedGuardianId}`
         : 'http://localhost:3000/guardians/create';
-
+  
       const response = await fetch(apiUrl, requestOptions);
       const result = await response.json();
-      console.log(result);
-      // If the guardian was created or updated successfully, assign children
-      if (result.message === 'Guardian account created successfully.' || result.message === 'Guardian updated successfully.') {
-        // Assign children only if formData.children is not empty
+  
+      if (!response.ok) {
+        // Check for duplicate key violation
+        if (response.status === 409) {
+          setError('Duplicate key violation. Guardian with the same email or CNIC already exists.');
+        } else {
+          // Handle other errors
+          setError('An error occurred while saving the guardian information.');
+        }
+        return; // Do not proceed further on error
+      }
+  
+      if (
+        result.message === 'Guardian account created successfully.' ||
+        result.message === 'Guardian updated successfully.'
+      ) {
         if (formData.children.length > 0) {
           const assignChildrenRequestOptions = {
             method: 'POST',
@@ -105,18 +120,19 @@ const Guardian = () => {
               children: formData.children,
             }),
           };
-
-          // Call the new route to assign children to the guardian
+  
           await fetch('http://localhost:3000/guardians/assign-child', assignChildrenRequestOptions);
         }
-
+  
         handleModalClose();
         fetchGuardians();
       }
     } catch (error) {
       console.error('Error adding/updating guardian:', error);
+      setError('An unexpected error occurred.');
     }
   };
+  
 
   const handleSelectChildren = (selectedChildren) => {
     setFormData((prevData) => ({
@@ -125,8 +141,10 @@ const Guardian = () => {
     }));
   };
 
-
-  const handleModalShow = () => setShowModal(true);
+  const handleModalShow = () => {
+    setShowModal(true);
+    setError(null); // Clear error on modal show
+  };
 
   const handleEdit = (guardianId) => {
     const selectedGuardian = guardians.find((guardian) => guardian._id === guardianId);
@@ -141,7 +159,6 @@ const Guardian = () => {
     setSelectedGuardianId(guardianId);
     setShowModal(true);
   };
-
 
   const handleDelete = async (guardianId) => {
     try {
@@ -218,8 +235,9 @@ const Guardian = () => {
           <Modal.Title>{selectedGuardianId ? 'Edit Guardian' : 'Add Guardian'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleFormSubmit}>
-            <Form.Group controlId="formName">
+            <Form.Group controlId="formNameG">
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
@@ -229,7 +247,7 @@ const Guardian = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-            <Form.Group controlId="formCNIC">
+            <Form.Group controlId="formCNICG">
               <Form.Label>CNIC</Form.Label>
               <Form.Control
                 type="text"
@@ -239,7 +257,7 @@ const Guardian = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-            <Form.Group controlId="formAddress">
+            <Form.Group controlId="formAddressG">
               <Form.Label>Address</Form.Label>
               <Form.Control
                 type="text"
@@ -249,7 +267,7 @@ const Guardian = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-            <Form.Group controlId="formContactNumber">
+            <Form.Group controlId="formContactNumberG">
               <Form.Label>Contact Number</Form.Label>
               <Form.Control
                 type="text"
@@ -259,7 +277,7 @@ const Guardian = () => {
                 onChange={handleFormChange}
               />
             </Form.Group>
-            <Form.Group controlId="formEmail">
+            <Form.Group controlId="formEmailG">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -291,9 +309,6 @@ const Guardian = () => {
                 <div>No students available.</div>
               )}
             </Form.Group>
-
-
-
 
             <Button variant="primary" type="submit">
               Save

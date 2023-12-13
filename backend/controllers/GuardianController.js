@@ -27,8 +27,7 @@ const createGuardianAccount = async (req, res) => {
 
         for (const child of children) {
           const { childId, relation } = child;
-        
-
+      
           // Check if the child is already in the guardian's children array
           if (
             existingGuardian.children.some(
@@ -96,7 +95,11 @@ const createGuardianAccount = async (req, res) => {
         }
       });
     }
-  } catch (error) {
+  }
+  catch (error) {
+    if(error.code === 11000){
+      return res.status(409).json({ error: 'Duplicate key violation. Guardian with the same email or CNIC already exists.' });
+    }
     console.error('Error creating guardian account:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -166,6 +169,9 @@ const updateGuardian = async (req, res) => {
 
     res.status(200).json({ message: 'Guardian updated successfully.', guardian: guardianToUpdate });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ error: 'Duplicate key violation. Guardian with the same email or CNIC already exists.' });
+    }
     console.error('Error updating guardian:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }

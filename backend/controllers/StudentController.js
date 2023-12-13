@@ -10,11 +10,19 @@ const addStudent = async (req, res) => {
     // Retrieve schoolId from the decoded token
     const { schoolId } = req.decoded;
 
-    // Check if the CNIC or roll number already exists
-    const existingStudent = await Student.findOne({ $or: [{ cnic }, { rollNumber }] });
+    // Check if the CNIC, roll number, or RFID tag already exists
+    const existingStudent = await Student.findOne({ $or: [{ cnic }, { rollNumber }, { rfidTag }] });
 
     if (existingStudent) {
-      return res.status(400).json({ error: 'Student with CNIC or Roll Number already exists.' });
+      let duplicateField;
+      if (existingStudent.cnic === cnic) {
+        duplicateField = 'CNIC';
+      } else if (existingStudent.rollNumber === rollNumber) {
+        duplicateField = 'Roll Number';
+      } else if (existingStudent.rfidTag === rfidTag) {
+        duplicateField = 'RFID Tag';
+      }
+      return res.status(400).json({ error: `Student with the same ${duplicateField} already exists.` });
     }
 
     // Create a new student with the retrieved schoolId
@@ -41,6 +49,18 @@ const addStudent = async (req, res) => {
     res.status(201).json({ message: 'Student added successfully.', student: newStudent });
   } catch (error) {
     console.error('Error adding student:', error);
+    if (error.name === 'MongoError' && error.code === 11000) {
+      // Duplicate key error (CNIC, Roll Number, or RFID Tag already exists)
+      let duplicateField;
+      if (error.keyPattern.cnic) {
+        duplicateField = 'CNIC';
+      } else if (error.keyPattern.rollNumber) {
+        duplicateField = 'Roll Number';
+      } else if (error.keyPattern.rfidTag) {
+        duplicateField = 'RFID Tag';
+      }
+      return res.status(409).json({ error: `Duplicate key violation. Student with the same ${duplicateField} already exists.` });
+    }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
@@ -99,6 +119,10 @@ const updateStudent = async (req, res) => {
     res.json({ message: 'Student updated successfully.', student: existingStudent });
   } catch (error) {
     console.error('Error updating student:', error);
+    if (error.code === 11000) {
+      // Duplicate key error (CNIC or Roll Number already exists)
+      return res.status(409).json({ error: 'Duplicate key violation. Student with the same CNIC or Roll Number already exists.' });
+    }
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

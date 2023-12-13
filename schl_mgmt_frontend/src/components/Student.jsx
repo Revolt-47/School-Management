@@ -72,17 +72,33 @@ const Student = () => {
         ? `http://localhost:3000/students/edit/${selectedStudentId}`
         : 'http://localhost:3000/students/add';
   
-      //console.log('Request Options:', requestOptions);  // Log request options
-  
       const response = await fetch(apiUrl, requestOptions);
-      //console.log('Response:', response);  // Log the response
+  
+      if (!response.ok) {
+        // Check for duplicate key violation
+        if (response.status === 409) {
+          // Parse the response body as JSON
+          const responseBody = await response.json();
+          // Display alert for duplicate key violation
+          alert(responseBody.error);
+        } else {
+          // Handle other errors (you may want to display a more specific message)
+          alert('An error occurred while adding/updating student. Please try again later.');
+        }
+        return; // Do not proceed further on error
+      }
   
       handleModalClose();
       fetchStudents();
     } catch (error) {
       console.error('Error adding/updating student:', error);
+      alert('An unexpected error occurred. Please try again later.');
     }
   };
+  
+  
+  
+  
   
 
   const handleEdit = (studentId) => {
