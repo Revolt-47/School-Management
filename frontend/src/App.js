@@ -5,9 +5,9 @@ import SuperAdminHomePage from './SuperAdminScreens/HomePage';
 import SuperAdminLogin from './SuperAdminScreens/Login';
 import SchoolDetailsScreen from './SuperAdminScreens/SchoolDetails';
 import { BrowserRouter as Router } from 'react-router-dom';
-import PaymentForm from './PaymentScreens/InititalPayment';
-import SuccessScreen from './PaymentScreens/ConfirmationScreen';
 // import PaymentForm from './PaymentScreens/InititalPayment';
+// import SuccessScreen from './PaymentScreens/ConfirmationScreen';
+// // import PaymentForm from './PaymentScreens/InititalPayment';
 
 const isAuthenticated = () => {
   // Check if the token is present and valid
@@ -33,10 +33,10 @@ const App = () => {
           <Route path="/superadmin/home" element={<AuthRoute element={<SuperAdminHomePage />} />} />
           <Route path="/superadmin/allschools" element={<AuthRoute element={<AllSchoolsScreen />} />} />
           <Route path="/superadmin/schooldetails/:id" element={<AuthRoute element={<SchoolDetailsScreen />} />} />
-          {/* <Route path="/" element={<SuperAdminLogin />}  /> */}
-          <Route path="/:schoolId" element={<PaymentForm />}  />
+          <Route path="/" element={<SuperAdminLogin />}  />
+          {/* <Route path="/:schoolId" element={<PaymentForm />}  />
           <Route path="verify/:schoolId/:clientSecret" element={<SuccessScreen />}  />
-          
+           */}
          
         </Routes>
       </Router>
