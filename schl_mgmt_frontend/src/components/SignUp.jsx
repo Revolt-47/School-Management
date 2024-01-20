@@ -26,22 +26,29 @@ const SignUpForm = () => {
 
   const containerStyle = {
     display: 'flex',
-    height: '92vh',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '90vh',
     padding: '60px',
-    justifyContent: 'space-around',
-    overflowX: 'hidden',
-    overflowY: 'auto',
+    flexWrap: 'wrap',
+    overflow: 'auto',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+    '-ms-overflow-style': 'none',
+    'overflow': '-moz-scrollbars-none',
   };
 
-  const leftHalfStyle = {
+  const formStyle = {
     flex: '1',
-    marginLeft: '-200px',
+    marginRight: '30px',
   };
 
-  const rightHalfStyle = {
+  const imageStyle = {
     flex: '1',
-    padding: '20px',
-    marginRight: '-100px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   };
 
   const handleInputChange = (e) => {
@@ -119,7 +126,7 @@ const SignUpForm = () => {
 
   return (
     <main style={containerStyle}>
-      <section style={leftHalfStyle}>
+      <section style={formStyle}>
         <Container fluid>
           <Row className="mb-4 justify-content-center">
             <Col xs="auto">
@@ -348,7 +355,7 @@ const SignUpForm = () => {
 
 
 
-      <section style={rightHalfStyle}>
+      <section style={imageStyle}>
         <img src={image} alt="logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
       </section>
 
