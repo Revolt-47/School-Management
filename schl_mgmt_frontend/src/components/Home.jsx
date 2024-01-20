@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Student from "./Student";
 import Guardian from "./Guardian";
-import { FaUserGraduate, FaUserShield } from "react-icons/fa";
+import { FaUserGraduate, FaUserShield, FaBus } from "react-icons/fa";
+import Driver from "./Driver";
 
 const containerStyle = {
   display: 'flex',
@@ -67,11 +68,18 @@ function Home() {
           >
             <FaUserShield style={iconSize} /> Guardian
           </div>
-        </div>
+          <div
+            style={{ ...tabStyle, ...activeTab === 'driver' && activeTabStyle }}
+            onClick={() => handleTabClick('driver')}
+          >
+            <FaBus style={iconSize} /> Drivers
+          </div>
+          </div>
       </div>
       <div style={contentContainerStyle}>
         {activeTab === 'student' && <Student />}
         {activeTab === 'guardian' && <Guardian />}
+        {activeTab === 'driver' && <Driver />}
       </div>
     </div>
   );
