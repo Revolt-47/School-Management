@@ -6,6 +6,8 @@ const Guardian = () => {
   const [guardians, setGuardians] = useState([]);
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [cnicError, setCnicError] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     cnic: '',
@@ -69,12 +71,25 @@ const Guardian = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+      // Check if the input is CNIC
+      if (name === 'cnic') {
+        const cnicRegex = /^[0-9-]*$/;
+        if (!cnicRegex.test(value)) {
+          setCnicError('CNIC can only contain numbers and dashes');
+          return;
+        } else {
+          setCnicError('');
+        }
+      }
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
+    if (cnicError || !formData.name || !formData.cnic || !formData.address || !formData.contactNumber || !formData.email) {
+      setError('Please fill all the required fields.');
+      return;
+    }
     try {
       const token = Cookies.get('token');
       const requestOptions = {
@@ -256,6 +271,7 @@ const Guardian = () => {
                 value={formData.cnic}
                 onChange={handleFormChange}
               />
+              {cnicError && <div className="error" style={{color:"red"}}>{cnicError}</div>}
             </Form.Group>
             <Form.Group controlId="formAddressG">
               <Form.Label>Address</Form.Label>
