@@ -56,18 +56,6 @@ const SignUpForm = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
     setShowValidationError(false);
     setShowPasswordMismatchError(false);
-
-    // Check if the input is email
-  if (name === 'email') {
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(value)) {
-      setEmailError('Invalid email format');
-      return;
-    } else {
-      setEmailError('');
-    }
-  }
-
   // Check if the input is password
   if (name === 'password') {
     const passwordRegex = /^(?=.*[A-Z]).{8,}$/;
@@ -85,7 +73,17 @@ const SignUpForm = () => {
     [name]: value
   });
   };
-  
+
+  const handleEmailBlur = (event) => {
+    const { value } = event.target;
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
+  };
+
   const handleNextStep = async () => {
     if (
       step === 1 &&
@@ -195,6 +193,7 @@ const SignUpForm = () => {
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
+                          onBlur={handleEmailBlur}
                           required
                         />
                       {emailError && <div className="error" style={{color:"red"}}>{emailError}</div>}

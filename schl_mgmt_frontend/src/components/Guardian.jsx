@@ -6,6 +6,7 @@ const Guardian = () => {
   const [guardians, setGuardians] = useState([]);
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const [cnicError, setCnicError] = useState('');
 
   const [formData, setFormData] = useState({
@@ -81,13 +82,27 @@ const Guardian = () => {
           setCnicError('');
         }
       }
+      
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleEmailBlur = (event) => {
+    const { value } = event.target;
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (cnicError || !formData.name || !formData.cnic || !formData.address || !formData.contactNumber || !formData.email) {
       setError('Please fill all the required fields.');
+      return;
+    }
+    if(emailError){
       return;
     }
     try {
@@ -301,7 +316,9 @@ const Guardian = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleFormChange}
+                onBlur={handleEmailBlur}
               />
+               {emailError && <div className="error" style={{color:"red"}}>{emailError}</div>}
             </Form.Group>
             <Form.Group controlId="formChildren">
               <Form.Label>Children</Form.Label>
