@@ -38,7 +38,6 @@ const SignUpForm = () => {
       display: 'none',
     },
     '-ms-overflow-style': 'none',
-    'overflow': '-moz-scrollbars-none',
   };
   const formStyle = {
     flex: '1',

@@ -5,6 +5,8 @@ import Cookies from 'js-cookie';
 const Student = () => {
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [cnicError, setCnicError] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     cnic: '',
@@ -53,13 +55,29 @@ const Student = () => {
   };
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+      const { name, value } = e.target;
+
+      // Check if the input is CNIC
+      if (name === 'cnic') {
+        const cnicRegex = /^[0-9-]*$/;
+        if (!cnicRegex.test(value)) {
+          setCnicError('CNIC can only contain numbers and dashes');
+          return;
+        } else {
+          setCnicError('');
+        }
+      }
+
+      // Update the form data
+      setFormData({
+        ...formData,
+        [name]: value
+      });
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(formData);
     try {
       const token = Cookies.get('token');
       const requestOptions = {
@@ -84,7 +102,7 @@ const Student = () => {
           setError(result.error);
         } else {
           // Handle other errors
-          setError('An error occurred while adding/updating student. Please try again later.');
+          setError('An error occurred while adding/updating student. Please try again later.'+result.error);
         }
         return; // Do not proceed further on error
       }
@@ -214,6 +232,7 @@ const Student = () => {
                 value={formData.cnic}
                 onChange={handleFormChange}
               />
+              {cnicError && <div className="error" style={{color:"Red"}}>{cnicError}</div>}
             </Form.Group>
             <Form.Group controlId="formRollNumber">
               <Form.Label>Roll Number</Form.Label>
