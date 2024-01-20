@@ -6,20 +6,23 @@ import Cookies from 'js-cookie';
 
 const containerStyle = {
   display: "flex",
-  height: "92vh",
+  height: "100vh",
   padding: "60px",
   justifyContent: "space-around",
+  overflow: "hidden"
 }
 
 const leftHalfStyle = {
-  flex: "1",
-  marginLeft: "-200px",
+  alignSelf: "flex-start", // This will align the box to the start of the container
+  width: "50%", // Adjust this as needed
+  marginTop: "-50px", // Add some top margin to move it up
 }
 
 const rightHalfStyle = {
   flex: "1",
   padding: "20px",
-  marginRight: "-100px"
+  marginRight: "0px",
+  height: "100%"
 }
 
 function SignInPage({ updateAuthenticationStatus }) {
@@ -62,7 +65,7 @@ function SignInPage({ updateAuthenticationStatus }) {
   return (
     <main style={containerStyle}>
       <section style={leftHalfStyle}>
-        <Container fluid>
+        <Container fluid >
           <Row className="mt-5 align-items-start justify-content-center">
             <Col xs={12} md={10} lg={8}>
               <div style={{ backgroundColor: 'white', padding: '30px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', borderRadius: '10px' }}>
