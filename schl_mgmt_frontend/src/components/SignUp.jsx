@@ -8,6 +8,9 @@ const SignUpForm = () => {
   const [step, setStep] = useState(1);
   const [showValidationError, setShowValidationError] = useState(false);
   const [showPasswordMismatchError, setShowPasswordMismatchError] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -26,19 +29,17 @@ const SignUpForm = () => {
 
   const containerStyle = {
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
-    height: '90vh',
+    justifyContent: 'center',
     padding: '60px',
     flexWrap: 'wrap',
-    overflow: 'auto',
+    overflow: 'visible',
     '&::-webkit-scrollbar': {
       display: 'none',
     },
     '-ms-overflow-style': 'none',
     'overflow': '-moz-scrollbars-none',
   };
-
   const formStyle = {
     flex: '1',
     marginRight: '30px',
@@ -56,8 +57,36 @@ const SignUpForm = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
     setShowValidationError(false);
     setShowPasswordMismatchError(false);
-  };
 
+    // Check if the input is email
+  if (name === 'email') {
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Invalid email format');
+      return;
+    } else {
+      setEmailError('');
+    }
+  }
+
+  // Check if the input is password
+  if (name === 'password') {
+    const passwordRegex = /^(?=.*[A-Z]).{8,}$/;
+    if (!passwordRegex.test(value)) {
+      setPasswordError('Password must be at least 8 characters long and contain at least one uppercase letter');
+      return;
+    } else {
+      setPasswordError('');
+    }
+  }
+
+  // Update the form data
+  setFormData({
+    ...formData,
+    [name]: value
+  });
+  };
+  
   const handleNextStep = async () => {
     if (
       step === 1 &&
@@ -76,6 +105,9 @@ const SignUpForm = () => {
       return;
     }
 
+    if (emailError || passwordError) {
+      return;
+    }
     setShowValidationError(false);
     setShowPasswordMismatchError(false);
 
@@ -166,8 +198,8 @@ const SignUpForm = () => {
                           onChange={handleInputChange}
                           required
                         />
+                      {emailError && <div className="error" style={{color:"red"}}>{emailError}</div>}
                       </Form.Group>
-
                       <Form.Group controlId="contactNumber" className="mb-4">
                         <Form.Label>Contact Number</Form.Label>
                         <Form.Control
@@ -190,8 +222,8 @@ const SignUpForm = () => {
                           onChange={handleInputChange}
                           required
                         />
+                      {passwordError && <div className="error" style={{color:"red"}}>{passwordError}</div>}
                       </Form.Group>
-
                       <Form.Group controlId="confirmPassword" className="mb-4">
                         <Form.Label>Confirm Password</Form.Label>
                         <Form.Control
@@ -202,6 +234,7 @@ const SignUpForm = () => {
                           onChange={handleInputChange}
                           required
                         />
+                      {formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && <div className="password-match" style={{color:"green"}}>Passwords match</div>}
                       </Form.Group>
 
                       {showValidationError && (
