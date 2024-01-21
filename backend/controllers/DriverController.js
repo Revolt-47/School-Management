@@ -94,23 +94,29 @@ const createDriverAccount = async (req, res) => {
 
 
 // Function to delete a driver by ID
+// Function to delete a driver by ID
 const deleteDriverById = async (req, res) => {
   try {
-    const { driverId } = req.params;
+    const { driverId, schoolId } = req.body;
 
-    // Find and delete the driver by ID
-    const deletedDriver = await Driver.findByIdAndDelete(driverId);
+    // Find and update the driver by ID to remove the specified school
+    const updatedDriver = await Driver.findByIdAndUpdate(
+      driverId,
+      { $pull: { schools: schoolId } },
+      { new: true }
+    );
 
-    if (!deletedDriver) {
+    if (!updatedDriver) {
       return res.status(404).json({ error: 'Driver not found.' });
     }
 
-    res.status(200).json({ message: 'Driver deleted successfully.' });
+    res.status(200).json({ message: 'School removed from driver successfully.', updatedDriver });
   } catch (error) {
-    console.error('Error deleting driver:', error);
+    console.error('Error removing school from driver:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 // Function to update driver information
 const updateDriver = async (req, res) => {
