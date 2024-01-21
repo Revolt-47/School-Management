@@ -1,7 +1,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const School = require('../models/SchoolModel');
 const Payment = require('../models/PaymentModels');
-const Student = require('../models/StudentModel')
+const Student = require('../models/StudentModel');
+const cron = require('node-cron');
 
 const calculateInitialAmount = async (numGates) => {
   // Calculate the initial amount based on the number of gates
@@ -176,28 +177,48 @@ const createMonthlySubscription = async (schoolId) => {
       console.log('Number of students:', school.numberOfStudents);
   
       // Calculate the monthly subscription amount
+
+      console.log(customer)
       const amount = await calculateMonthlySubscriptionAmount(schoolId);
   
-      // Create a subscription with Stripe
       const subscription = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [
-          {
-            price: 'price_1OGcTREdXzoBMsb84RQP40hb', // Replace with your actual Stripe product price ID
-            quantity: school.numberOfStudents,
-          },
-        ],
-        payment_behavior: 'default_incomplete',
-        billing_cycle_anchor: Math.floor(Date.now() / 1000) + 3600 * 24 * 30, // Start the subscription a week from now
-      });
-  
-      // Return the created subscription
-      return subscription;
+              customer: `${customer.id}`,
+               items: [
+                    { price: 'price_1OahV2EdXzoBMsb8T80xVVYz',
+                      // quantity: school.numberOfStudents,
+    },
+  ],
+});
+recordusage(subscription,school.numberOfStudents);
+saveSubscriptionDetails(school._id,amount,subscription)
+return subscription;
+      
     } catch (error) {
       console.error('Error creating monthly subscription:', error);
       throw error;
     }
   };
+
+  const recordusage = async (subscription, students) => {
+    try {
+      // Create the usage record with the current time
+      await stripe.subscriptionItems.createUsageRecord(
+        subscription.items.data[0].id,
+        {
+          quantity: students,
+          timestamp: 'now', // Use 'now' to indicate the current time
+          action: 'increment',
+        }
+      );
+  
+      console.log('Usage record created successfully.');
+    } catch (error) {
+      console.error('Error creating usage record:', error);
+      throw error;
+    }
+  };
+  
+  
   
   
   // Helper function to save subscription details in MongoDB
@@ -210,6 +231,7 @@ const createMonthlySubscription = async (schoolId) => {
         amount: amount,
         paymentMethod: 'Card', // Assuming it's a card payment
         paymentType: 'Monthly',
+        referenceNumber : subscription.items.data[0].id
       });
   
       // Save the document
@@ -219,6 +241,55 @@ const createMonthlySubscription = async (schoolId) => {
       throw error;
     }
   };
+
+  cron.schedule('0 0 */24 * * *', async () => {
+    try {
+      // Retrieve saved subscriptions from MongoDB
+      const savedSubscriptions = await Payment.find({
+        paymentType: 'Monthly',
+      });
+  
+      // Iterate over each saved subscription and record usage
+      for (const savedSubscription of savedSubscriptions) {
+        await recordUsageForSavedSubscription(savedSubscription);
+      }
+  
+      console.log('Usage recording task completed successfully.');
+    } catch (error) {
+      console.error('Error in usage recording task:', error);
+    }
+  });
+  
+  // Function to record usage for a saved subscription
+const recordUsageForSavedSubscription = async (savedSubscription) => {
+  try {
+    // Retrieve subscription details from Stripe using the reference number
+    const subscription = await stripe.subscriptions.retrieve(savedSubscription.referenceNumber);
+
+    // Retrieve the school associated with the subscription
+    const school = await School.findById(savedSubscription.school);
+
+    if (!school) {
+      console.error(`School not found for subscription ${savedSubscription.referenceNumber}`);
+      return;
+    }
+
+    // Fetch the number of students from the school model
+    const numberOfStudents = school.numberOfStudents;
+
+    // Record usage for the subscription
+    await stripe.subscriptionItems.createUsageRecord(subscription.items.data[0].id, {
+      quantity: numberOfStudents,
+      timestamp: 'now',
+      action: 'increment',
+    });
+
+    console.log(`Usage recorded for subscription ${savedSubscription.referenceNumber}`);
+  } catch (error) {
+    console.error(`Error recording usage for subscription ${savedSubscription.referenceNumber}:`, error);
+  }
+};
+
   
 
 
