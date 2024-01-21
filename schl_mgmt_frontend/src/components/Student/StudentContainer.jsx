@@ -1,6 +1,6 @@
 // Student.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import StudentList from './StudentList';
 import StudentModal from './StudentModal';
@@ -173,20 +173,26 @@ const StudentContainer = () => {
 
 
   return (
-    <Container className="mt-5">
-      <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search student by any credential"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                      width: '50%', // Increase the width of the search box
-                      display: 'block', // Make the search box a block element
-                      margin: '0 auto', // Center the search box
-                    }}
-                  />
-      <Row>
+    <Container className="mt-5" style={{ height: '100vh', overflowY: 'auto' }}>
+  <Form.Control
+    type="text"
+    placeholder="Search student by any credential"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    style={{
+      width: '50%',
+      display: 'block',
+      margin: '0 auto',
+      position: 'sticky',
+      top: 70,
+      zIndex: 1000,
+      border: 'none',
+      borderRadius: '15px',
+      boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
+      backgroundColor: '#f5f5f5',
+    }}
+  />
+      <Row style={{marginTop:"100px"}}>
         <Col>
           <Button variant="primary" onClick={() => setShowModal(true)}>
             Add Student
@@ -208,6 +214,7 @@ const StudentContainer = () => {
         cnicError={cnicError}
         handleFormSubmit={handleFormSubmit}
       />
+      {successMessage && <div className="alert alert-success">{successMessage}</div>}
     </Container>
   );
 };
