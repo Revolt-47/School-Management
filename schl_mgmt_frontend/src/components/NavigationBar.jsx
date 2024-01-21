@@ -13,6 +13,12 @@ function NavBar() {
   const [authenticated, setAuthenticated] = useState(!!Cookies.get('token'));
   const navigate = useNavigate();
   const location = useLocation();
+  
+  const handleLogout = () => {
+    Cookies.remove('token');
+    window.location.reload();
+  };
+  
 
   const updateAuthenticationStatus = (status) => {
     setAuthenticated(status);
@@ -42,7 +48,11 @@ function NavBar() {
             <Nav.Link as={Link} to="/about" style={navLinksStyle}>About</Nav.Link>
             <Nav.Link as={Link} to="/services" style={navLinksStyle}>Services</Nav.Link>
             <Nav.Link as={Link} to="/contact" style={navLinksStyle}>Contact</Nav.Link>
-            <Nav.Link as={Link} to="/signIn" style={navLinksStyle}>Login</Nav.Link>
+            {Cookies.get('token') ? (
+    <Nav.Link onClick={handleLogout} style={navLinksStyle}>Logout</Nav.Link>
+  ) : (
+    <Nav.Link as={Link} to="/signIn" style={navLinksStyle}>Login</Nav.Link>
+  )}
           </Nav>
         </Navbar.Collapse>
       </Navbar>
