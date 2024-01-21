@@ -1,11 +1,10 @@
-import React from "react";    
-
+// just a simple component to display the driver heading
 const Driver = () => {
     return (
         <div>
-            <h1>Driver</h1>
+        <h1>Drivers</h1>
         </div>
     );
-}
-
-export default Driver;
+    }
+    export default Driver;
+    

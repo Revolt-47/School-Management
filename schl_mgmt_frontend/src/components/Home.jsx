@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Student from "./Student";
-import Guardian from "./Guardian";
+import Student from "../components/Student/StudentContainer";
+import Guardian from "../components/Guardian/GuardianContainer";
 import { FaUserGraduate, FaUserShield, FaBus, FaThumbtack } from "react-icons/fa";
 import Driver from "./Driver";
 
