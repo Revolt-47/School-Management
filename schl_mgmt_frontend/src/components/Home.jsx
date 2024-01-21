@@ -1,82 +1,77 @@
 import React, { useState } from "react";
 import Student from "./Student";
-import Guardian from "../components/Guardian/Guardian";
-import { FaUserGraduate, FaUserShield, FaBus } from "react-icons/fa";
+import Guardian from "./Guardian";
+import { FaUserGraduate, FaUserShield, FaBus, FaThumbtack } from "react-icons/fa";
 import Driver from "./Driver";
-
-const containerStyle = {
-  display: 'flex',
-  height: '100vh', // Make it full-screen
-  fontFamily: 'Arial, sans-serif',
-};
-
-const tabsContainerStyle = {
-  width: '200px', // Set a fixed width for the side panel
-  padding: '20px',
-  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-};
-
-const contentContainerStyle = {
-  flex: 1, // Fill the remaining space
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const tabStyle = {
-  padding: '10px',
-  cursor: 'pointer',
-  borderBottom: '2px solid #ccc',
-  userSelect: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  transition: 'border-color 0.3s, color 0.3s',
-};
-
-const activeTabStyle = {
-  fontWeight: 'bold',
-  borderBottomColor: '#3498db',
-  color: '#3498db',
-  background: '#fff',
-};
-
-const iconSize = {
-  fontSize: '1.2em',
-};
 
 function Home() {
   const [activeTab, setActiveTab] = useState('student');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerPinned, setIsDrawerPinned] = useState(false);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
+    if (!isDrawerPinned) {
+      setIsDrawerOpen(false);
+    }
+  };
+
+  const handleMouseEnter = () => {
+    if (!isDrawerPinned) {
+      setIsDrawerOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDrawerPinned) {
+      setIsDrawerOpen(false);
+    }
+  };
+
+  const togglePin = () => {
+    setIsDrawerPinned(!isDrawerPinned);
+    setIsDrawerOpen(!isDrawerPinned);
+  };
+
+  const tabStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    cursor: 'pointer',
+    padding: '10px',
+    borderBottom: '1px solid #ccc',
+    boxShadow: '3px 3px 5px rgba(0, 0, 0, 0.3)',
+    borderRadius: '5px',
+    margin: '10px 0',
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={tabsContainerStyle}>
-        <div>
-          <div
-            style={{ ...tabStyle, ...activeTab === 'student' && activeTabStyle }}
-            onClick={() => handleTabClick('student')}
-          >
-            <FaUserGraduate style={iconSize} /> Student
-          </div>
-          <div
-            style={{ ...tabStyle, ...activeTab === 'guardian' && activeTabStyle }}
-            onClick={() => handleTabClick('guardian')}
-          >
-            <FaUserShield style={iconSize} /> Guardian
-          </div>
-          <div
-            style={{ ...tabStyle, ...activeTab === 'driver' && activeTabStyle }}
-            onClick={() => handleTabClick('driver')}
-          >
-            <FaBus style={iconSize} /> Drivers
-          </div>
-          </div>
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'Arial, sans-serif' }}>
+      <div 
+        style={{ 
+          width: isDrawerOpen ? '200px' : '0', 
+          transition: 'width 0.5s', 
+          overflow: 'hidden', 
+          padding: '20px', 
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' 
+        }} 
+        onMouseEnter={handleMouseEnter} 
+        onMouseLeave={handleMouseLeave}
+      >
+        <div onClick={togglePin}>
+          <FaThumbtack style={{ color: isDrawerPinned ? 'blue' : 'grey' }} />
+        </div>
+        <div onClick={() => handleTabClick('student')} style={tabStyle}>
+          <FaUserGraduate /> Student
+        </div>
+        <div onClick={() => handleTabClick('guardian')} style={tabStyle}>
+          <FaUserShield /> Guardian
+        </div>
+        <div onClick={() => handleTabClick('driver')} style={tabStyle}>
+          <FaBus /> Drivers
+        </div>
       </div>
-      <div style={contentContainerStyle}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {activeTab === 'student' && <Student />}
         {activeTab === 'guardian' && <Guardian />}
         {activeTab === 'driver' && <Driver />}
