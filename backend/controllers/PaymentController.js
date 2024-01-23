@@ -86,11 +86,9 @@ const createPaymentIntent = async (amount, currency, schoolId) => {
 
 
 
-
-
 const createInitialPayment = async (req, res) => {
   try {
-    const { schoolId} = req.body;
+    const { schoolId } = req.body;
 
     // Check if the school exists
     const school = await School.findById(schoolId);
@@ -111,22 +109,22 @@ const createInitialPayment = async (req, res) => {
     // Calculate the initial amount
     const amount = await calculateInitialAmount(school.numberOfGates);
     console.log(amount)
-
     // Create a payment intent with Stripe
-    const paymentIntent = await createPaymentIntent(amount, 'pkr',schoolId);
+    const paymentIntent = await createPaymentIntent(amount, 'pkr', schoolId);
+    console.log(paymentIntent)
 
     // Return client secret to confirm the payment on the client side
-    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+    res.status(200).json({ clientSecret: paymentIntent.client_secret, customerId: paymentIntent.customer });
   } catch (error) {
     console.error('Error creating initial payment:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+
 const handleSuccessfulInitialPayment = async (req, res) => {
   try {
     const { schoolId, numGates, paymentMethod, referenceNumber } = req.body;
-
 
     // Check if the school exists
     const school = await School.findById(schoolId);
@@ -137,8 +135,29 @@ const handleSuccessfulInitialPayment = async (req, res) => {
     // Calculate the initial amount
     const amount = await calculateInitialAmount(school.numberOfGates);
 
+    // Retrieve the existing initial payment
+    const existingInitialPayment = await Payment.findOne({
+      school: school._id,
+      paymentType: 'Initial',
+    });
+
+    if (existingInitialPayment) {
+      return res.status(200).json({ message: 'Initial payment already exists.', payment: existingInitialPayment });
+    }
+
+    // Create a payment intent with Stripe
+    const paymentIntent = await createPaymentIntent(amount, 'pkr', schoolId);
+
     // Handle the successful payment
     const payment = await handleSuccessfulPayment(schoolId, amount, paymentMethod, referenceNumber, 'Initial');
+
+    // Retrieve the payment method details
+    const paymentMethodDetails = await stripe.paymentMethods.retrieve(paymentMethod);
+
+    // Store the payment method details for future use
+    await stripe.paymentMethods.attach(paymentMethodDetails.id, {
+      customer: paymentIntent.customer,
+    });
 
     res.status(201).json({ message: 'Initial payment created successfully.', payment });
   } catch (error) {
@@ -263,8 +282,6 @@ return subscription;
   // Function to record usage for a saved subscription
 const recordUsageForSavedSubscription = async (savedSubscription) => {
   try {
-    // Retrieve subscription details from Stripe using the reference number
-    const subscription = await stripe.subscriptions.retrieve(savedSubscription.referenceNumber);
 
     // Retrieve the school associated with the subscription
     const school = await School.findById(savedSubscription.school);
@@ -278,7 +295,7 @@ const recordUsageForSavedSubscription = async (savedSubscription) => {
     const numberOfStudents = school.numberOfStudents;
 
     // Record usage for the subscription
-    await stripe.subscriptionItems.createUsageRecord(subscription.items.data[0].id, {
+    await stripe.subscriptionItems.createUsageRecord(savedSubscription.referenceNumber, {
       quantity: numberOfStudents,
       timestamp: 'now',
       action: 'increment',
@@ -290,12 +307,111 @@ const recordUsageForSavedSubscription = async (savedSubscription) => {
   }
 };
 
-  
+const pauseSubscription = async (req, res) => {
+  const { schoolId } = req.body;
+
+  try {
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      return res.status(404).json({ error: 'No school found.' });
+    }
+
+    const customer = await stripe.customers.list({
+      email: school.email,
+      limit: 1,
+    });
+
+    if (customer.data.length === 0) {
+      return res.status(404).json({ error: 'No customer found for the school email.' });
+    }
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customer.data[0].id,
+      status: 'active',
+      limit: 1,
+    });
+
+    if (subscriptions.data.length === 0) {
+      return res.status(404).json({ error: 'No active subscription found for the school.' });
+    }
+
+    const subscription = subscriptions.data[0];
+
+    const updatedSubscription = await stripe.subscriptions.update(
+      subscription.id,
+      {
+        pause_collection: {
+          behavior: 'void',
+        },
+      }
+    );
+
+    school.status = 'inactive';
+    school.save();
+
+    return res.status(200).json({ message: 'Subscription paused successfully.', subscription: updatedSubscription });
+  } catch (error) {
+    console.error('Error pausing subscription:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const resumeSubscription = async (req, res) => {
+  const { schoolId } = req.body;
+
+  try {
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      return res.status(404).json({ error: 'No school found.' });
+    }
+
+    const customer = await stripe.customers.list({
+      email: school.email,
+      limit: 1,
+    });
+
+    if (customer.data.length === 0) {
+      return res.status(404).json({ error: 'No customer found for the school email.' });
+    }
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customer.data[0].id,
+      status: 'active',
+      limit: 1,
+    });
+
+    if (subscriptions.data.length === 0) {
+      return res.status(404).json({ error: 'No active subscription found for the school.' });
+    }
+
+    const subscription = subscriptions.data[0];
+
+    const updatedSubscription = await stripe.subscriptions.update(
+      subscription.id,
+      {
+        pause_collection: {
+          behavior: '',
+        },
+      }
+    );
+
+    school.status = 'active';
+    school.save();
+
+    return res.status(200).json({ message: 'Subscription resumed successfully.', subscription: updatedSubscription });
+  } catch (error) {
+    console.error('Error resuming subscription:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 module.exports = {
   createInitialPayment,
   handleSuccessfulInitialPayment,
   createMonthlySubscription,
-
+  pauseSubscription,
+  resumeSubscription
 };
