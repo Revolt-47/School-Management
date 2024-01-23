@@ -1,6 +1,5 @@
 const SuperAdmin = require('../models/SuperAdminModel');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer'); // For sending emails
 
