@@ -1,5 +1,5 @@
 const School = require('../models/SchoolModel'); // Adjust the path to your model file
-const bcrypt = require('bcrypt'); // For password hashing
+const bcrypt =  require('bcryptjs'); // For password hashing
 const nodemailer = require('nodemailer'); // For sending emails
 const crypto = require('crypto'); // For generating verification codes
 const cron = require('node-cron');
@@ -133,7 +133,9 @@ async function Login(req, res) {
     }
 
     // Generate a JWT token
-    const payload = { schoolId: school._id, username: school.username, email: school.email, role: 'school' };
+    const payload = { schoolId: school._id.toString(), username: school.username, email: school.email, role: 'school' };
+    console.log("Payload in token is : ");
+    console.log(payload);
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '72h' });
 
     // Return the token along with a success message

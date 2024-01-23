@@ -23,7 +23,7 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  class: {
+  studentClass: {
     type: String,
     required: true,
   },
