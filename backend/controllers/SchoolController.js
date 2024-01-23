@@ -139,7 +139,7 @@ async function Login(req, res) {
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '72h' });
 
     // Return the token along with a success message
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, schoolId : school._id});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'An error occurred during login' });

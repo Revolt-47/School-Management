@@ -2,6 +2,7 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Container, Grid, Paper } from '@mui/material';
 import logo from './AdminAssets/logo.jpeg';
 import school from './AdminAssets/school.png';
+
 import { useNavigate } from 'react-router-dom';
 
 const SuperAdminHomePage = () => {
@@ -21,7 +22,7 @@ const SuperAdminHomePage = () => {
   };
 
   return (
-    <div>
+    <div style={{ width: '100vw', height: '90vh' }}>
       {/* Title Bar */}
       <AppBar position="static" style={{ backgroundColor: '#000000' }}>
         <Toolbar style={{ justifyContent: 'space-between' }}>

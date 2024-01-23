@@ -1,7 +1,7 @@
 const express = require('express');
 const paymentController = require('../controllers/PaymentController');
 const router = express.Router();
-
+const {VerifyRegistrationToken,VerifySchool} = require('../utils/Authenticate')
 // Endpoint to create an initial payment
 router.post('/initial-payment', paymentController.createInitialPayment);
 
@@ -20,6 +20,10 @@ router.post('/monthly-subscription', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.post('/pause-subscription',VerifyRegistrationToken,VerifySchool,paymentController.pauseSubscription);
+router.post('/resume-subscription',VerifyRegistrationToken,VerifySchool,paymentController.resumeSubscription);
+
 
 // Add more endpoints for other payment functions...
 
