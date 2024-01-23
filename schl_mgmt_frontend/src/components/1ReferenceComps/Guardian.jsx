@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Table, Button, Modal, Form, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 
@@ -6,6 +6,10 @@ const Guardian = () => {
   const [guardians, setGuardians] = useState([]);
   const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [cnicError, setCnicError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     cnic: '',
@@ -18,12 +22,7 @@ const Guardian = () => {
   const [selectedGuardianId, setSelectedGuardianId] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchGuardians();
-    fetchStudents();
-  }, []);
-
-  const fetchGuardians = async () => {
+  const fetchGuardians = useCallback(async () => {
     try {
       const token = Cookies.get('token');
       const response = await fetch('http://localhost:3000/guardians/getAllGuardians', {
@@ -31,14 +30,30 @@ const Guardian = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await response.json();
+      let data = await response.json();
+
+      // If the search term is not empty, filter the guardians
+      if (searchTerm.trim() !== '') {
+        data = data.filter((guardian) =>
+          guardian.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guardian.cnic.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guardian.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guardian.contactNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          guardian.email.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
       setGuardians(data);
     } catch (error) {
       console.error('Error fetching guardians:', error);
     }
-  };
+  }, [searchTerm]); // searchTerm is added as a dependency to re-run this hook when the search term changes
 
-  const fetchStudents = async () => {
+  useEffect(() => {
+    fetchGuardians();
+  }, [fetchGuardians]);
+
+  const fetchStudents =  useCallback(async () => {
     try {
       const token = Cookies.get('token');
       const response = await fetch('http://localhost:3000/students/students/schoolId', {
@@ -51,7 +66,11 @@ const Guardian = () => {
     } catch (error) {
       console.error('Error fetching students:', error);
     }
-  };
+  }, []); // Empty dependency array because we only want to run this hook once
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]); // Empty dependency array because we only want to run this hook once
 
   const handleModalClose = () => {
     setShowModal(false);
@@ -69,12 +88,39 @@ const Guardian = () => {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
+      // Check if the input is CNIC
+      if (name === 'cnic') {
+        const cnicRegex = /^[0-9-]*$/;
+        if (!cnicRegex.test(value)) {
+          setCnicError('CNIC can only contain numbers and dashes');
+          return;
+        } else {
+          setCnicError('');
+        }
+      }
+      
     setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleEmailBlur = (event) => {
+    const { value } = event.target;
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(value)) {
+      setEmailError('Invalid email format');
+    } else {
+      setEmailError('');
+    }
   };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-  
+    if (cnicError || !formData.name || !formData.cnic || !formData.address || !formData.contactNumber || !formData.email) {
+      setError('Please fill all the required fields.');
+      return;
+    }
+    if(emailError){
+      return;
+    }
     try {
       const token = Cookies.get('token');
       const requestOptions = {
@@ -179,6 +225,17 @@ const Guardian = () => {
 
   return (
     <Container className="mt-5">
+        <Form.Control
+          type="text"
+          placeholder="Search guardian by any credential"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '50%',
+            display: 'block',
+            margin: '0 auto',
+          }}
+        />
       <Row>
         <Col>
           <Button variant="primary" onClick={handleModalShow}>
@@ -256,6 +313,7 @@ const Guardian = () => {
                 value={formData.cnic}
                 onChange={handleFormChange}
               />
+              {cnicError && <div className="error" style={{color:"red"}}>{cnicError}</div>}
             </Form.Group>
             <Form.Group controlId="formAddressG">
               <Form.Label>Address</Form.Label>
@@ -285,7 +343,9 @@ const Guardian = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleFormChange}
+                onBlur={handleEmailBlur}
               />
+               {emailError && <div className="error" style={{color:"red"}}>{emailError}</div>}
             </Form.Group>
             <Form.Group controlId="formChildren">
               <Form.Label>Children</Form.Label>
