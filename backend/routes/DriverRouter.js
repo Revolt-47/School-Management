@@ -18,5 +18,6 @@ router.post('/getStudents',authMiddleware.VerifyRegistrationToken,authMiddleware
 router.post('/getSchools',authMiddleware.VerifyRegistrationToken,authMiddleware.VerifyDriver,driverController.getDriverSchools);
 router.post('/getDetails',authMiddleware.VerifyRegistrationToken,authMiddleware.VerifyDriver,driverController.getDriverDetails);
 router.post('/getVehicles',authMiddleware.VerifyRegistrationToken,driverController.getDriverVehicles);
+router.post('/getAllDriversofSchool', authMiddleware.VerifyRegistrationToken,authMiddleware.VerifySchool,driverController.getAllDriversofSchool);
 
 module.exports = router;
