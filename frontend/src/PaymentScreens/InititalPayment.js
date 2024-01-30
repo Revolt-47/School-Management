@@ -6,6 +6,7 @@ import CheckoutForm from "./CheckoutForm";
 import Modal from "react-modal";
 import ErrorIcon from "@mui/icons-material/Error";
 import "./Payment.css";
+import Paper from '@mui/material/Paper';
 import { CircularProgress, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
@@ -17,6 +18,7 @@ export default function PaymentForm() {
   const [clientSecret, setClientSecret] = useState("");
   const [initialPaymentStatus, setInitialPaymentStatus] = useState("loading");
   const { schoolId } = useParams();
+  const [amount, setAmount] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(true);
 
   useEffect(() => {
@@ -35,7 +37,9 @@ export default function PaymentForm() {
       })
       .then((data) => {
         setClientSecret(data.clientSecret);
+        console.log(data.clientSecret)
         setInitialPaymentStatus(data.initialPaymentStatus);
+        setAmount(data.amount);
       })
       .catch((error) => {
         console.error("Error fetching initial payment:", error);
@@ -46,62 +50,92 @@ export default function PaymentForm() {
   const appearance = {
     theme: "stripe",
   };
-  const options = {
-    clientSecret,
-    appearance,
-    elements: {
-      card: {
-        hidePostalCode: true, // Hide the postal code field
-      },
-    },
-    features: {
-      card: { checkout: false }, // Disable the 1-click checkout feature
-    },
-  };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
   };
 
+  const redirectToLogin = () => {
+    // Replace with your router's logic for redirection to the login screen
+    window.location.href = "http://localhost:3000";
+  };
+
+  if (clientSecret === null) {
+    return (
+      <div className="App">
+        <Modal
+          isOpen={isDialogOpen}
+          onRequestClose={handleCloseDialog}
+          contentLabel="Initial Payment Dialog"
+          className="custom-modal"
+          overlayClassName="custom-overlay"
+        >
+          <h2>Initial Payment Already Done</h2>
+          <p>You have already completed the initial payment.</p>
+          <button onClick={redirectToLogin}>Go to Login</button>
+        </Modal>
+      </div>
+    );
+  }
+
+  const options = {
+    clientSecret,
+    appearance,
+    elements: {
+      card: {
+        hidePostalCode: true,
+      },
+    },
+    features: {
+      card: { checkout: false },
+    },
+  };
+
   return (
     <div className="App">
-      {initialPaymentStatus === "loading" && (
+      {clientSecret === null && (
+        <Paper elevation={5} style={{ padding: '20px', margin: '20px', backgroundColor: '#FFEB3B' , width: '100vw'}}>
+          <Typography variant="h5">Initial Payment Already Done</Typography>
+          <Typography variant="body1">You have already completed the initial payment.</Typography>
+        </Paper>
+      )}
+      {clientSecret !== null && initialPaymentStatus === 'loading' && (
         <div>
           <CircularProgress />
           <Typography variant="body1">Loading...</Typography>
         </div>
       )}
-      {initialPaymentStatus === "success" && (
+      {initialPaymentStatus === 'success' && (
         <>
           <CheckCircleIcon color="primary" fontSize="large" />
           <Typography variant="h5">Initial Payment Done!</Typography>
           <Typography variant="body1">You have already completed the initial payment.</Typography>
         </>
       )}
-      {initialPaymentStatus === "error" && (
+      {initialPaymentStatus === 'error' && (
         <>
           <ErrorIcon color="error" fontSize="large" />
-          <Typography variant="h5">Error</Typography>
-          <Typography variant="body1">There was an error processing the initial payment.</Typography>
+          <Typography variant="h4">Error</Typography>
+          <Typography variant="h5">There was an error processing the initial payment.</Typography>
         </>
       )}
-      {initialPaymentStatus !== "loading" && initialPaymentStatus !== "success" && initialPaymentStatus !== "error" && (
+      {clientSecret !== null && initialPaymentStatus !== 'loading' && initialPaymentStatus !== 'success' && initialPaymentStatus !== 'error' && (
         <>
           <Modal
             isOpen={isDialogOpen}
             onRequestClose={handleCloseDialog}
             contentLabel="Initial Payment Dialog"
-            className="custom-modal" // Apply custom styles
-            overlayClassName="custom-overlay" // Apply custom styles to overlay
+            className="custom-modal"
+            overlayClassName="custom-overlay"
           >
             <h2>Initial Payment</h2>
             <p>It's an initial payment calculated based on the number of gates of your school.</p>
             <p>To continue further, please proceed with the initial payment.</p>
-            <Typography variant="h6">Amount: {initialPaymentStatus} PKR</Typography>
+            <p>The following Amount will be chraged</p>
+            <Typography >${amount/100}</Typography>
             <button onClick={handleCloseDialog}>Close</button>
           </Modal>
           <Elements options={options} stripe={stripePromise}>
-            {/* Pass clientSecret as a prop to CheckoutForm */}
             <CheckoutForm clientSecret={clientSecret} schoolId={schoolId} />
           </Elements>
         </>
@@ -109,3 +143,4 @@ export default function PaymentForm() {
     </div>
   );
 }
+
