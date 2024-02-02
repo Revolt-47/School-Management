@@ -1,13 +1,28 @@
-import { Link, Route, Routes } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import { Navbar, Nav } from 'react-bootstrap';
 import Home from './Home';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
-import ForgotPassword from './ForgotPass'; // Import the ForgotPassword component
+import ForgotPassword from './ForgotPass';
 import EmailVerification from './EmailVerification';
-import ResetPassword from './ResetPassword'; // Import the ResetPassword component  
+import ResetPassword from './ResetPassword';
+import Cookies from 'js-cookie';
 
 function NavBar() {
+  const [authenticated, setAuthenticated] = useState(!!Cookies.get('token'));
+  const navigate = useNavigate();
+
+  const updateAuthenticationStatus = (status) => {
+    setAuthenticated(status);
+  };
+
+  useEffect(() => {
+    if (!authenticated) {
+      navigate('/signIn');
+    }
+  }, [authenticated, navigate]);
+
   const navLinksStyle = {
     marginLeft: "5px",
     marginRight: "5px",
@@ -32,11 +47,11 @@ function NavBar() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/signIn/*" element={<SignIn />} />
+        <Route path="/signIn" element={<SignIn updateAuthenticationStatus={updateAuthenticationStatus} />} />
         <Route path="/signUp" element={<SignUp />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Add this line for the ForgotPassword route */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email/:schoolId" element={<EmailVerification />} />
-        <Route path="/reset-password/:schoolId/:resetToken/:expirationTime" element={<ResetPassword />} /> {/* Add this line for the ResetPassword route */}
+        <Route path="/reset-password/:schoolId/:resetToken/:expirationTime" element={<ResetPassword />} />
       </Routes>
     </div>
   );

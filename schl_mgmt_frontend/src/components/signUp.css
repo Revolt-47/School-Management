@@ -27,4 +27,19 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
   }
-  
+  /* signUp.css */
+  .form-container {
+    flex: 1; /* This will allow the form to take up available space */
+  }
+
+  .image-container {
+    flex: 1; /* This will allow the image to take up available space */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .image-container img {
+    max-width: 100%; /* This will ensure the image doesn't overflow its container */
+    height: auto; /* This will maintain the image's aspect ratio */
+  }
