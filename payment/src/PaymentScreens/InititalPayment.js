@@ -49,6 +49,7 @@ export default function PaymentForm() {
 
   const appearance = {
     theme: "stripe",
+    
   };
 
   const handleCloseDialog = () => {
