@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import { Navbar, Nav } from 'react-bootstrap';
 import Home from './Home';
 import SignIn from './SignIn';
@@ -12,16 +12,24 @@ import Cookies from 'js-cookie';
 function NavBar() {
   const [authenticated, setAuthenticated] = useState(!!Cookies.get('token'));
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const handleLogout = () => {
+    Cookies.remove('token');
+    window.location.reload();
+  };
+  
 
   const updateAuthenticationStatus = (status) => {
     setAuthenticated(status);
   };
 
   useEffect(() => {
-    if (!authenticated) {
+    const publicRoutes = ['/signIn', '/signUp', '/forgot-password'];
+    if (!authenticated && !publicRoutes.includes(location.pathname)) {
       navigate('/signIn');
     }
-  }, [authenticated, navigate]);
+  }, [authenticated, navigate, location]);
 
   const navLinksStyle = {
     marginLeft: "5px",
@@ -40,7 +48,11 @@ function NavBar() {
             <Nav.Link as={Link} to="/about" style={navLinksStyle}>About</Nav.Link>
             <Nav.Link as={Link} to="/services" style={navLinksStyle}>Services</Nav.Link>
             <Nav.Link as={Link} to="/contact" style={navLinksStyle}>Contact</Nav.Link>
-            <Nav.Link as={Link} to="/signIn" style={navLinksStyle}>Login</Nav.Link>
+            {Cookies.get('token') ? (
+    <Nav.Link onClick={handleLogout} style={navLinksStyle}>Logout</Nav.Link>
+  ) : (
+    <Nav.Link as={Link} to="/signIn" style={navLinksStyle}>Login</Nav.Link>
+  )}
           </Nav>
         </Navbar.Collapse>
       </Navbar>
