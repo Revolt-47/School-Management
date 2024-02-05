@@ -32,30 +32,7 @@ const CheckoutForm = ({ clientSecret, schoolId }) => {
     });
   }, [stripe, clientSecret]);
 
-  // const handleSuccessfulPayment = async () => {
-  //   try {
-  //     const response = await fetch("http://localhost:3000/payments/handle-successful-initial-payment", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         schoolId: schoolId,
-  //         clientSecret: clientSecret,
-  //         paymentMethod: "Card", 
-  //       }),
-  //     });
 
-  //     // Handle the response as needed
-  //     if (response.ok) {
-  //       console.log("Payment handling successful");
-  //     } else {
-  //       console.error("Failed to handle payment");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error handling payment:", error);
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,7 +46,7 @@ const CheckoutForm = ({ clientSecret, schoolId }) => {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `http://localhost:3001/verify/${schoolId}/${clientSecret}`, // Replace with your desired return URL
+        return_url: `http://localhost:3001/verify/${schoolId}`, // Replace with your desired return URL
       },
     });
 

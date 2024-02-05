@@ -15,6 +15,7 @@ cors = require("cors")
 
 var allowedOrigins = [
   'http://localhost:3001',
+  'http://localhost:3002'
 ];
 
 app.use(cors({
