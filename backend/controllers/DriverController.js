@@ -73,7 +73,7 @@ const createDriverAccount = async (req, res) => {
         from: 'amirdaniyal47@gmail.com',
         to: email,
         subject: 'Your Credentials',
-        text: `Your credentials:\nContact Number: ${contactNumber}\nPassword: ${randomPassword} for VanDriver app`,
+        text: `Your credentials:\nContact Number: ${email}\nPassword: ${randomPassword} for VanDriver app`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
