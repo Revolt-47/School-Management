@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Student from "../components/Student/StudentContainer";
 import Guardian from "../components/Guardian/GuardianContainer";
 import { FaUserGraduate, FaUserShield, FaBus, FaThumbtack } from "react-icons/fa";
-import Driver from "./Driver";
+import Driver from "./Driver/Driver";
 
 function Home() {
   const [activeTab, setActiveTab] = useState('student');

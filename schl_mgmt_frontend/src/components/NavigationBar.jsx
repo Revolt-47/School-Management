@@ -7,6 +7,11 @@ import SignUp from './SignUp';
 import ForgotPassword from './ForgotPass';
 import EmailVerification from './EmailVerification';
 import ResetPassword from './ResetPassword';
+import AddDriverForm from './Driver/AddDriverForm';
+import UpdateDriver from './Driver/UpdateDriver';
+import DriverDetails from './Driver/DriverDetails';
+import DriverStudent from './Driver/DriverStudent';
+
 import Cookies from 'js-cookie';
 
 function NavBar() {
@@ -64,6 +69,10 @@ function NavBar() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-email/:schoolId" element={<EmailVerification />} />
         <Route path="/reset-password/:schoolId/:resetToken/:expirationTime" element={<ResetPassword />} />
+        <Route path="/add-driver" element={<AddDriverForm />} />
+        <Route path="/edit-driver/:driverId" element={<UpdateDriver />} />
+        <Route path="/driver-details/:driverId" element={<DriverDetails />} />
+        <Route path="/assign-students/:driverId" element={<DriverStudent />} />
       </Routes>
     </div>
   );

@@ -52,6 +52,7 @@ function SignInPage({ updateAuthenticationStatus }) {
 
       if (response.ok) {
         Cookies.set('token', data.token, { expires: 7 });
+        Cookies.set('schoolId', data.schoolId, { expires: 7 });
         updateAuthenticationStatus(true);
         navigate('/home');
       }

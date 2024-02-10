@@ -24,12 +24,10 @@ const studentDriverRelationSchema = new mongoose.Schema({
   student: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Student',
-    required: true,
   },
   relation: {
     type: String,
     enum: ['pickup', 'dropoff', 'both'],
-    required: true,
   },
 });
 

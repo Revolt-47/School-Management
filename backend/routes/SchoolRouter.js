@@ -12,7 +12,7 @@ Schoolrouter.post('/forget-pw',forgotPassword);
 Schoolrouter.post('/resetPassword',resetPassword);
 Schoolrouter.post('/update-timing',VerifyRegistrationToken,VerifySchool,updateTiming);
 Schoolrouter.post('/getallschools',VerifyRegistrationToken,VerifyAdmin,getAllSchools)
-Schoolrouter.post('/getschool/:id',VerifyRegistrationToken,VerifyAdmin,getSchoolById)
+Schoolrouter.post('/getschool/:id',VerifyRegistrationToken,VerifySchool || VerifyAdmin,getSchoolById)
 Schoolrouter.post('/changestatus',VerifyRegistrationToken,VerifyAdmin,changeSchoolStatusById)
 Schoolrouter.get('/totalschools',VerifyRegistrationToken,VerifyAdmin,getTotalSchoolCount);
 Schoolrouter.post('/changepw',VerifyRegistrationToken,VerifySchool,changePassword)

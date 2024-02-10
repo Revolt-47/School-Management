@@ -16,7 +16,8 @@ const createDriverAccount = async (req, res) => {
       schoolId, // Assuming schoolId is provided in the request body
       vehicles, // Assuming vehicles is an array of objects with regNumber, company, modelName, and type
     } = req.body;
-
+    console.log(req.body);
+    console.log(req.body.vehicles);
     // Generate a random password
     const randomPassword = crypto.randomBytes(8).toString('hex');
 
@@ -88,7 +89,7 @@ const createDriverAccount = async (req, res) => {
     }
   } catch (error) {
     console.error('Error creating driver account:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json(error);
   }
 };
 
@@ -97,8 +98,10 @@ const createDriverAccount = async (req, res) => {
 // Function to delete a driver by ID
 const deleteDriverById = async (req, res) => {
   try {
+    console.log("Delete Requst Received");
     const { driverId, schoolId } = req.body;
-
+    console.log(driverId);
+    console.log(schoolId);
     // Find and update the driver by ID to remove the specified school
     const updatedDriver = await Driver.findByIdAndUpdate(
       driverId,
@@ -491,6 +494,27 @@ const getDriverSchools = async (req, res) => {
   }
 };
 
+const getAllDriversofSchool = async (req, res) => {
+  try {
+    const { schoolId } = req.body;
+
+    // Find the school first
+    const school = await School.findById(schoolId);
+
+    if (!school) {
+      return res.status(404).json({ error: 'School not found.' });
+    }
+
+    // Find all drivers that have this schoolId in their schools array
+    const drivers = await Driver.find({ schools: schoolId });
+
+    res.status(200).json(drivers);
+  } catch (error) {
+    console.error('Error getting school drivers:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 
 module.exports = {
   createDriverAccount,
@@ -507,5 +531,6 @@ module.exports = {
   getDriverSchools,
   getDriverStudentsBySchool,
   getDriverDetails,
-  getDriverVehicles
+  getDriverVehicles,
+  getAllDriversofSchool,
 };
