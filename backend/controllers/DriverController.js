@@ -16,7 +16,8 @@ const createDriverAccount = async (req, res) => {
       schoolId, // Assuming schoolId is provided in the request body
       vehicles, // Assuming vehicles is an array of objects with regNumber, company, modelName, and type
     } = req.body;
-
+    console.log(req.body);
+    console.log(req.body.vehicles);
     // Generate a random password
     const randomPassword = crypto.randomBytes(8).toString('hex');
 
@@ -88,7 +89,7 @@ const createDriverAccount = async (req, res) => {
     }
   } catch (error) {
     console.error('Error creating driver account:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json(error);
   }
 };
 
@@ -97,8 +98,10 @@ const createDriverAccount = async (req, res) => {
 // Function to delete a driver by ID
 const deleteDriverById = async (req, res) => {
   try {
+    console.log("Delete Requst Received");
     const { driverId, schoolId } = req.body;
-
+    console.log(driverId);
+    console.log(schoolId);
     // Find and update the driver by ID to remove the specified school
     const updatedDriver = await Driver.findByIdAndUpdate(
       driverId,
