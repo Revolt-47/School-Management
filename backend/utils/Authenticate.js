@@ -1,22 +1,18 @@
 const jwt = require('jsonwebtoken');
 
 let VerifyRegistrationToken = (req, res, next) => {
-    let token = req.headers.authorization;
-
+    let {token} = req.body;
+    console.log(token)
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
-    } else {
-        // Extract the token from the "Bearer" prefix
-        token = token.split(' ')[1];
-
+    }
+    else {
         jwt.verify(token, process.env.SECRET, (err, decoded) => {
             if (err) {
                 res.status(401).json({ "Success": false, "Message": "Invalid token" });
-                console.log(err);
-            } else {
+            }
+            else {
                 req.decoded = decoded;
-                console.log("Decoded token: ");
-                console.log(decoded);
                 next();
             }
         });
