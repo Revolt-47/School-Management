@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import Cookies from 'js-cookie';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const DriverDetails = () => {
+  const navigate = useNavigate();
   const [driver, setDriver] = useState(null);
   const [schoolUsernames, setSchoolUsernames] = useState([]);
   const token = Cookies.get('token');
@@ -73,6 +74,7 @@ const DriverDetails = () => {
       updatedDriver.students = updatedDriver.students.filter(student => student._id !== studentId);
       setDriver(updatedDriver);
 
+      // Fetch updated driver details
       const fetchDriverDetails = async () => {
         try {
           const response = await fetch(`http://localhost:3000/driver/getDetails`, {
@@ -91,9 +93,51 @@ const DriverDetails = () => {
       };
   
       fetchDriverDetails();
-
     } catch (error) {
       console.error('Error removing student:', error);
+      // Handle error if needed
+    }
+  };
+
+  const handleRemoveVehicle = async (regNumber) => {
+    try {
+      const response = await fetch(`http://localhost:3000/driver/${driverId}/vehicles/${regNumber}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      // Handle success message if needed
+      console.log(data.message);
+      alert(data.message);
+      // Update driver details after removal
+      const updatedDriver = { ...driver };
+      updatedDriver.vehicles = updatedDriver.vehicles.filter(vehicle => vehicle.regNumber !== regNumber);
+      setDriver(updatedDriver);
+
+      // Fetch updated driver details
+      const fetchDriverDetails = async () => {
+        try {
+          const response = await fetch(`http://localhost:3000/driver/getDetails`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ driverId }),
+          });
+          const data = await response.json();
+          setDriver(data);
+        } catch (error) {
+          console.error('Error fetching driver details:', error);
+        }
+      };
+  
+      fetchDriverDetails();
+    } catch (error) {
+      console.error('Error removing vehicle:', error);
       // Handle error if needed
     }
   };
@@ -117,7 +161,10 @@ const DriverDetails = () => {
                     <ul>
                       {driver.vehicles.map(vehicle => (
                         <li key={vehicle._id}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           {vehicle.regNumber} - {vehicle.company} - {vehicle.modelName} - {vehicle.type}
+                          <Button variant="light" style={{ color: "red" }} size="sm" onClick={() => handleRemoveVehicle(vehicle.regNumber)}>Remove</Button>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -129,9 +176,10 @@ const DriverDetails = () => {
                     <ul>
                       {driver.students.map(student => (
                         <li key={student._id}>
-                          {student.student} - Relation: {student.relation}
-            
-                          <Button variant="danger" size="sm" onClick={() => handleRemoveStudent(student.student)}>Remove</Button>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{student.student} - Relation: {student.relation}</span>
+                            <Button variant="light" style={{ color: "red" }} size="sm" onClick={() => handleRemoveStudent(student.student)}>Remove</Button>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -142,6 +190,7 @@ const DriverDetails = () => {
           </div>
         </Col>
       </Row>
+      <Button variant="primary" onClick={() => navigate('/')}>Back</Button>
     </Container>
   );
 };
