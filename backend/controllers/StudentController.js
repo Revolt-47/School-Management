@@ -169,10 +169,26 @@ const getTotalStudentsCount = async (req, res) => {
   }
 };
 
+const getStudentbyID = async (req,res) => {
+  const {studentId} = req.body;
+  try{
+    const std = await Student.findById(studentId);
+    if(std != null){
+      res.status(200).json({ success: true, std });
+    }
+    else{
+      res.status(404).json({ error: 'Student not found' });
+    }
+  }catch(error){
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 module.exports = {
   addStudent,
   deleteStudent,
   updateStudent,
   getStudentsBySchool,
   getTotalStudentsCount,
+  getStudentbyID
 };
