@@ -27,10 +27,13 @@ const StudentContainer = () => {
   const fetchStudents = useCallback(async () => {
     try {
       const token = Cookies.get('token');
-      const response = await fetch('http://localhost:3000/students/students/schoolId', {
+      const schoolId = Cookies.get('schoolId'); 
+      const response = await fetch(`http://localhost:3000/students/students/${schoolId}`, {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ token }),
       });
       let data = await response.json();
   

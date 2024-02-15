@@ -14,7 +14,7 @@ router.post('/forgot-password', guardianController.forgotPassword);
 router.post('/reset-password', guardianController.resetPassword);
 router.post('/getguardian/:studentId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardians);
 
-router.get('/getAllGuardians', VerifyRegistrationToken,VerifySchool, guardianController.getAllGuardians);
+router.post('/getAllGuardians', VerifyRegistrationToken,VerifySchool, guardianController.getAllGuardians);
 
 router.post('/assign-child', VerifyRegistrationToken, VerifyGuardian, guardianController.assignChildToGuardian);
 

@@ -20,7 +20,7 @@ const Driver = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ schoolId }),
+        body: JSON.stringify({ schoolId, token }),
       });
       const data = await response.json();
       setDrivers(data);

@@ -28,9 +28,8 @@ const GuardianContainer = () => {
       try {
         const token = Cookies.get('token');
         const response = await fetch('http://localhost:3000/guardians/getAllGuardians', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        method: 'POST',  
+        body: JSON.stringify({token}),
         });
         let data = await response.json();
   
@@ -66,7 +65,7 @@ const GuardianContainer = () => {
         const data = await response.json();
         setStudents(data.students);
       } catch (error) {
-        console.error('Error fetching students:', error);
+        console.log('Error fetching students:', error);
       }
     }, []); // Empty dependency array because we only want to run this hook once
   
