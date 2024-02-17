@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, DropdownButton, Dropdown, Button } from 'react-bootstrap';
+import { Table, DropdownButton, Dropdown, Button, Form } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
@@ -8,6 +8,7 @@ const DriverStudent = () => {
   const { driverId } = useParams();
   const [students, setStudents] = useState([]);
   const [driver, setDriver] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [studentRelations, setStudentRelations] = useState({});
   const token = Cookies.get('token');
@@ -56,7 +57,15 @@ const DriverStudent = () => {
   
     fetchData();
   }, [schoolId, driverId]);
-  
+
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.cnic.includes(searchTerm) ||
+    student.rollNumber.includes(searchTerm) ||
+    student.rfidTag.includes(searchTerm) ||
+    student.section.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.studentClass.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 
   const handleAssign = async () => {
@@ -110,7 +119,28 @@ const DriverStudent = () => {
 
   return (
     <div>
+       <div>
       <h2>Assign Students</h2>
+      <Form.Control
+        type="text"
+        placeholder="Search student by any credential"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '80%',
+          display: 'block',
+          margin: '0 auto',
+          position: 'sticky',
+          top: 70,
+          zIndex: 1000,
+          border: 'none',
+          borderRadius: '15px',
+          boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
+          backgroundColor: '#f5f5f5',
+          marginBottom: '80px',
+        }}
+      />
+    </div>
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -125,36 +155,36 @@ const DriverStudent = () => {
           </tr>
         </thead>
         <tbody>
-          {students.map(student => (
-            <tr key={student._id}>
-              <td>
-                <input
-                  type="checkbox"
-                  onChange={(event) => handleCheckboxChange(event, student._id)}
-                />
-              </td>
-              <td>{student.name}</td>
-              <td>{student.cnic}</td>
-              <td>{student.rollNumber}</td>
-              <td>{student.rfidTag}</td>
-              <td>{student.section}</td>
-              <td>{student.studentClass}</td>
-              <td>
-                <DropdownButton
-                  id={`dropdown-relation-${student._id}`}
-                  title={studentRelations[student._id] || 'Select Relation'} // Display selected relation or default text
-                  onSelect={(eventKey) => {
-                    handleRelationChange(eventKey, student._id); // Pass studentId to handleRelationChange
-                  }}
-                >
-                  <Dropdown.Item eventKey="pickup">Pickup</Dropdown.Item>
-                  <Dropdown.Item eventKey="dropoff">Dropoff</Dropdown.Item>
-                  <Dropdown.Item eventKey="both">Both</Dropdown.Item>
-                </DropdownButton>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {filteredStudents.map(student => (
+    <tr key={student._id}>
+      <td>
+        <input
+          type="checkbox"
+          onChange={(event) => handleCheckboxChange(event, student._id)}
+        />
+      </td>
+      <td>{student.name}</td>
+      <td>{student.cnic}</td>
+      <td>{student.rollNumber}</td>
+      <td>{student.rfidTag}</td>
+      <td>{student.section}</td>
+      <td>{student.studentClass}</td>
+      <td>
+        <DropdownButton
+          id={`dropdown-relation-${student._id}`}
+          title={studentRelations[student._id] || 'Select Relation'} // Display selected relation or default text
+          onSelect={(eventKey) => {
+            handleRelationChange(eventKey, student._id); // Pass studentId to handleRelationChange
+          }}
+        >
+          <Dropdown.Item eventKey="pickup">Pickup</Dropdown.Item>
+          <Dropdown.Item eventKey="dropoff">Dropoff</Dropdown.Item>
+          <Dropdown.Item eventKey="both">Both</Dropdown.Item>
+        </DropdownButton>
+      </td>
+    </tr>
+  ))}
+</tbody>
       </Table>
       <Button variant="primary" onClick={handleAssign}>Assign Student</Button>
     </div>
