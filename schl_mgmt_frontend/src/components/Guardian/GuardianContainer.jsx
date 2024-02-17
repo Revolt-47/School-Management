@@ -29,7 +29,10 @@ const GuardianContainer = () => {
         const token = Cookies.get('token');
         const response = await fetch('http://localhost:3000/guardians/getAllGuardians', {
         method: 'POST',  
-        body: JSON.stringify({token}),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         });
         let data = await response.json();
   
@@ -58,7 +61,8 @@ const GuardianContainer = () => {
       try {
         const token = Cookies.get('token');
         const response = await fetch('http://localhost:3000/students/students/schoolId', {
-          headers: {
+          method: 'POST',  
+        headers: {
             Authorization: `Bearer ${token}`,
           },
         });
