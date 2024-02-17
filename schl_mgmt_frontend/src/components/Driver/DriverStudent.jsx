@@ -19,7 +19,7 @@ const DriverStudent = () => {
         // Fetch both students and driver details concurrently
         const [studentsResponse, driverDetailsResponse] = await Promise.all([
           fetch(`http://localhost:3000/students/students/${schoolId}`, {
-            method: 'GET',
+            method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
@@ -46,7 +46,7 @@ const DriverStudent = () => {
         const assignedStudentIds = driverData.students.map(student => student.student);
         const unassignedStudents = studentsData.students.filter(student => !assignedStudentIds.includes(student._id));
         setStudents(unassignedStudents);
-  
+        
         // Set driver state
         setDriver(driverData);
       } catch (error) {

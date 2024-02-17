@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { useParams, useNavigate } from 'react-router-dom';
-
 const DriverDetails = () => {
   const navigate = useNavigate();
   const [driver, setDriver] = useState(null);
@@ -22,8 +21,16 @@ const DriverDetails = () => {
           body: JSON.stringify({ driverId }),
         });
         const data = await response.json();
+        //setDriver(data);
+        const students = data.students.map(student => student.student);
+        const studentNames = await fetchStudentNames(students);
+        // setStudents(studentNames);
+        //console.log('Student Names:', studentNames);
+        data.students =data.students.map((student, index) => ({ ...student, name: studentNames[index] }));
+        console.log('Updated Students:', data.students);
+        console.log(studentNames);
         setDriver(data);
-
+        //console.log('Updated Students:', driver.students);
         // Fetch school usernames
         const schoolIds = data.schools.map(school => school);
         const schoolUsernamesPromises = schoolIds.map(id => fetchSchoolUsername(id));
@@ -34,8 +41,37 @@ const DriverDetails = () => {
       }
     };
 
-    fetchDriverDetails();
+    fetchDriverDetails();      
   }, [driverId]);
+
+        
+  const fetchStudentNames = async (studentIds) => {
+    try {
+        const studentsWithNames = [];
+        for (const studentId of studentIds) {
+            const response = await fetch('http://localhost:3000/students/getdetails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Assuming you have a token variable accessible here
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ studentId })
+            });
+            if (response.ok) {
+                const studentData = await response.json();
+                studentsWithNames.push(studentData.std.name);
+            } else {
+                console.error(`Error fetching details for student with ID ${studentId}: ${response.statusText}`);
+            }
+        }
+        return studentsWithNames;
+    } catch (error) {
+        console.error('Error fetching student names:', error);
+        return [];
+    }
+};
+
 
   const fetchSchoolUsername = async (id) => {
     try {
@@ -86,7 +122,15 @@ const DriverDetails = () => {
             body: JSON.stringify({ driverId }),
           });
           const data = await response.json();
-          setDriver(data);
+          
+          const students = data.students.map(student => student.student);
+        const studentNames = await fetchStudentNames(students);
+        // setStudents(studentNames);
+        //console.log('Student Names:', studentNames);
+        data.students =data.students.map((student, index) => ({ ...student, name: studentNames[index] }));
+        console.log('Updated Students:', data.students);
+        console.log(studentNames);
+        setDriver(data);
         } catch (error) {
           console.error('Error fetching driver details:', error);
         }
@@ -177,7 +221,7 @@ const DriverDetails = () => {
                       {driver.students.map(student => (
                         <li key={student._id}>
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{student.student} - Relation: {student.relation}</span>
+                            <span>{student.name} - Relation: {student.relation}</span>
                             <Button variant="light" style={{ color: "red" }} size="sm" onClick={() => handleRemoveStudent(student.student)}>Remove</Button>
                           </div>
                         </li>

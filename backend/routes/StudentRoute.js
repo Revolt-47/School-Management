@@ -9,6 +9,6 @@ studentRouter.delete('/delete/:id',VerifyRegistrationToken,VerifySchool,studentC
 studentRouter.put('/edit/:studentId',VerifyRegistrationToken,VerifySchool,studentController.updateStudent);
 studentRouter.post('/students/:schoolId',VerifyRegistrationToken,VerifySchool,studentController.getStudentsBySchool);
 studentRouter.get('/totalcount',VerifyRegistrationToken,VerifyAdmin,studentController.getTotalStudentsCount);
-studentRouter.get('/getdetails',VerifyRegistrationToken,VerifySchool,studentController.getStudentbyID)
+studentRouter.post('/getdetails',VerifyRegistrationToken,VerifySchool,studentController.getStudentbyID)
 
 module.exports = studentRouter;

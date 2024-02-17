@@ -9,7 +9,7 @@ let VerifyRegistrationToken = (req, res, next) => {
     const token = authHeader.substring(7);
 
     // Process check-in request using the token
-    console.log('Token:', token);
+    //console.log('Token:', token);
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
     }
