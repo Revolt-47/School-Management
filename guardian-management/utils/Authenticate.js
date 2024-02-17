@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 let VerifyRegistrationToken = (req, res, next) => {
-    let {token} = req.body;
+    let {token} = req.header;
     console.log(token)
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
