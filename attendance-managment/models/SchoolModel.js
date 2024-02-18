@@ -57,6 +57,18 @@ const schoolSchema = new mongoose.Schema({
       },
     },
   ],
+  classes:[
+    {
+      class:{
+        type:String,
+        require : true
+      },
+      section:{
+        type:String,
+        required: true,
+      }
+    }
+  ]
 });
 
 const School = mongoose.model('School', schoolSchema);

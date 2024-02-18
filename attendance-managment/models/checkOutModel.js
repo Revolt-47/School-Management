@@ -13,16 +13,16 @@ const checkoutSchema = new Schema({
       required: true
     },
     time: {
-      type: String,
+      type: Date,
       required: true
     },
     date: {
       type: Date,
-      default: Date.now
     },
     pickupPerson: {
       type: Schema.Types.Mixed, // Allows storing either ObjectId or String
-      required: true
+      required: false,
+      default : null
     }
   });
 
