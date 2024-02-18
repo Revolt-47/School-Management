@@ -11,7 +11,7 @@ import AddDriverForm from './Driver/AddDriverForm';
 import UpdateDriver from './Driver/UpdateDriver';
 import DriverDetails from './Driver/DriverDetails';
 import DriverStudent from './Driver/DriverStudent';
-import FrontPage from './FrontPage';
+import FrontPage from './FrontPage/FrontPage';
 
 import Cookies from 'js-cookie';
 
