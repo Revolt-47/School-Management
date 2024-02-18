@@ -159,9 +159,10 @@ const getStudentsBySchool = async (req, res) => {
 
 const getTotalStudentsCount = async (req, res) => {
   try {
+    //console.log('Getting total students count');
     // Use the countDocuments method to get the total count of students
     const totalStudentsCount = await Student.countDocuments();
-
+    //console.log('Total students count:', totalStudentsCount);
     res.status(200).json({ totalStudentsCount });
   } catch (error) {
     console.error('Error getting total students count:', error);

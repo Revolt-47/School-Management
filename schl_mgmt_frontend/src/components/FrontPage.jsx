@@ -8,6 +8,7 @@ function FrontPage() {
   const [openTime, setOpenTime] = useState('');
   const [closeTime, setCloseTime] = useState('');
   const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [totalStudents, setTotalStudents] = useState(0);
 
   const fetchData = async () => {
     try {
@@ -22,8 +23,20 @@ function FrontPage() {
       });
       const data = await response.json();
       setSchoolData(data);
+
+      // Fetch total number of students
+      const studentsResponse = await fetch(`http://localhost:3000/students/totalcount`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      const studentsData = await studentsResponse.json();
+      console.log('Total students:', studentsData.totalStudentsCount);
+      setTotalStudents(studentsData.totalStudentsCount);
     } catch (error) {
-      console.error('Error fetching school data:', error);
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -61,6 +74,11 @@ function FrontPage() {
     }
   };
 
+  const formatLocalTime = (timeString) => {
+    const date = new Date(timeString);
+    return date.toLocaleTimeString([], { timeStyle: 'short' });
+  };
+
   return (
     <Container fluid className="mt-3">
       {schoolData && (
@@ -72,13 +90,13 @@ function FrontPage() {
                 <ul className="list-unstyled text-center">
                   {schoolData.school.timings && schoolData.school.timings.map((timing, index) => (
                     <li key={index} className="mb-2">
-                      <strong>{timing.day}:</strong> {timing.openTime} - {timing.closeTime}
+                      <strong>{timing.day}:</strong> {formatLocalTime(timing.openTime)} - {formatLocalTime(timing.closeTime)}
                     </li>
                   ))}
                 </ul>
               </Card>
               {!showUpdateForm && (
-                <Button variant="primary" onClick={() => setShowUpdateForm(true)} block>
+                <Button variant="primary" onClick={() => setShowUpdateForm(true)}>
                   Add School Timings
                 </Button>
               )}
@@ -114,7 +132,7 @@ function FrontPage() {
                 <h5 className="text-center mb-4">School Details</h5>
                 <div className="text-center mb-4">
                   <p><strong>Branch Name:</strong> {schoolData.school.branchName}</p>
-                  <p><strong>Number of Students:</strong> {schoolData.school.numberOfStudents}</p>
+                  <p><strong>Number of Students:</strong> {totalStudents}</p>
                   <p><strong>Address:</strong> {schoolData.school.address}</p>
                   <p><strong>City:</strong> {schoolData.school.city}</p>
                   <p><strong>Number of Gates:</strong> {schoolData.school.numberOfGates}</p>
