@@ -11,6 +11,7 @@ import AddDriverForm from './Driver/AddDriverForm';
 import UpdateDriver from './Driver/UpdateDriver';
 import DriverDetails from './Driver/DriverDetails';
 import DriverStudent from './Driver/DriverStudent';
+import FrontPage from './FrontPage';
 
 import Cookies from 'js-cookie';
 
@@ -62,7 +63,7 @@ function NavBar() {
         </Navbar.Collapse>
       </Navbar>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<FrontPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/signIn" element={<SignIn updateAuthenticationStatus={updateAuthenticationStatus} />} />
         <Route path="/signUp" element={<SignUp />} />
