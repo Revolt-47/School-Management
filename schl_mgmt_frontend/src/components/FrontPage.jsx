@@ -118,8 +118,8 @@ function FrontPage() {
                     <Form.Group controlId="formCloseTime">
                       <Form.Control type="time" value={closeTime} onChange={(e) => setCloseTime(e.target.value)} required />
                     </Form.Group>
-                    <Button variant="primary" type="submit" block>Update</Button>
-                    <Button variant="secondary" onClick={() => setShowUpdateForm(false)} block>Close</Button>
+                    <Button variant="primary" type="submit">Update</Button>
+                    <Button variant="secondary" onClick={() => setShowUpdateForm(false)}>Close</Button>
                   </Form>
                 </Card>
               </Col>
