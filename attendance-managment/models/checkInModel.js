@@ -13,7 +13,7 @@ const checkInSchema = new Schema({
       required: true
     },
     time: {
-      type: Date,
+      type: String,
       required: true
     },
     date: {
@@ -22,6 +22,7 @@ const checkInSchema = new Schema({
     }
   });
 
-module.exports = {
-    checkInSchema
-}
+const CheckIn = mongoose.model('CheckIn', checkInSchema);
+
+  module.exports = CheckIn;
+  

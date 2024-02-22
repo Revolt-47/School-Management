@@ -16,10 +16,11 @@ const attendanceSchema = new mongoose.Schema({
         required: true
     },
     day: {
-        type: String,
-        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        type: Number,
+        min: 0,
+        max: 6,
         required: true
-    },
+    },    
     status: {
         type: String,
         enum: ['Present', 'Absent', 'Late', 'Early Leave'],

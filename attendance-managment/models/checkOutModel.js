@@ -13,7 +13,7 @@ const checkoutSchema = new Schema({
       required: true
     },
     time: {
-      type: Date,
+      type: String,
       required: true
     },
     date: {
@@ -23,7 +23,12 @@ const checkoutSchema = new Schema({
       type: Schema.Types.Mixed, // Allows storing either ObjectId or String
       required: false,
       default : null
+    },
+    role:{
+      type: String,
     }
   });
 
-module.exports = {checkoutSchema}
+  const CheckOut = mongoose.model('CheckOut', checkoutSchema);
+
+  module.exports = CheckOut;
