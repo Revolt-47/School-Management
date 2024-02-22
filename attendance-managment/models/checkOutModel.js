@@ -18,12 +18,17 @@ const checkoutSchema = new Schema({
     },
     date: {
       type: Date,
-      default: Date.now
     },
     pickupPerson: {
       type: Schema.Types.Mixed, // Allows storing either ObjectId or String
-      required: true
+      required: false,
+      default : null
+    },
+    role:{
+      type: String,
     }
   });
 
-module.exports = {checkoutSchema}
+  const CheckOut = mongoose.model('CheckOut', checkoutSchema);
+
+  module.exports = CheckOut;

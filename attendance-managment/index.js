@@ -3,6 +3,7 @@ const app = express();
 require('dotenv').config();
 const port = process.env.PORT || 3000; // Use PORT from .env or default to 3000
 const mongoose = require('mongoose');
+const attendanceRouter = require('./routes/attendanceRoute')
 
 cors = require("cors")
 
@@ -48,7 +49,7 @@ app.get('/', (req, res) => {
 
 // Add the body parsing middleware
 app.use(express.json());
-
+app.use('/attendance',attendanceRouter)
 
 
 
