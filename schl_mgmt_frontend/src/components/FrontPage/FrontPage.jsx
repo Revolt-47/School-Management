@@ -27,7 +27,7 @@ function FrontPage() {
       });
       const data = await response.json();
       setSchoolData(data);
-
+      console.log(data);
       // Fetch total number of students
       const studentsResponse = await fetch(`http://localhost:3000/students/totalcount`, {
         method: 'GET',

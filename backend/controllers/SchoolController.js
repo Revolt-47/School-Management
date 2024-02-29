@@ -191,14 +191,14 @@ async function getAllSchools(req, res) {
 
 async function getSchoolById(req, res) {
   try {
-    const { id } = req.params;
+    const { schoolId } = req.decoded;
 
     // Check if the ID is valid
-    if (!(id)) {
+    if (!(schoolId)) {
       return res.status(400).json({ error: 'Invalid school ID' });
     }
 
-    const school = await School.findById(id);
+    const school = await School.findById(schoolId);
 
     if (!school) {
       return res.status(404).json({ error: 'School not found' });

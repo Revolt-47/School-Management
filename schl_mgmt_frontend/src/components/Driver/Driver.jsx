@@ -78,13 +78,15 @@ const Driver = () => {
 
   useEffect(() => {
     // Filter drivers based on the search term
+    if(drivers.length > 0) {
     const filtered = drivers.filter(driver =>
       driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.cnic.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.contactNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      );
     setFilteredDrivers(filtered);
+    }
   }, [drivers, searchTerm]);
 
 
