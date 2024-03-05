@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
+import {useNavigate} from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { BiCar, BiChevronDown, BiBuilding, BiSolidWatch } from 'react-icons/bi'; // Importing icons
 import StudentCountBox from './StudentCountBox';
@@ -13,8 +14,9 @@ function FrontPage() {
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalDrivers, setTotalDrivers] = useState(0); // New state for total drivers
+  const navigate = useNavigate()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const id = Cookies.get('schoolId');
       const token = Cookies.get('token');
@@ -26,6 +28,9 @@ function FrontPage() {
         }
       });
       const data = await response.json();
+      if (response.status === 401) {
+        navigate('/login');
+      }
       setSchoolData(data);
       console.log(data);
       // Fetch total number of students
@@ -36,6 +41,8 @@ function FrontPage() {
           'Authorization': `Bearer ${token}`,
         }
       });
+ 
+
       const studentsData = await studentsResponse.json();
       setTotalStudents(studentsData.totalStudentsCount);
 
@@ -53,11 +60,11 @@ function FrontPage() {
     } catch (error) {
       console.error('Error fetching data:', error);
     }
-  };
+  } , []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleTimingUpdate = async (e) => {
     e.preventDefault();
