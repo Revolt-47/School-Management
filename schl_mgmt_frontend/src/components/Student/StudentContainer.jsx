@@ -197,7 +197,11 @@ const StudentContainer = () => {
   />
       <Row style={{marginTop:"100px"}}>
         <Col>
-          <Button variant="primary" onClick={() => setShowModal(true)}>
+          <Button variant="primary" onClick={() => {
+            
+            setShowModal(true)
+          }
+            }>
             Add Student
           </Button>
         </Col>

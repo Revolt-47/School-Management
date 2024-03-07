@@ -10,7 +10,8 @@ const Driver = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const token = Cookies.get('token');
-  const schoolId = Cookies.get('schoolId');
+  const school = JSON.parse(Cookies.get('school'));
+  const schoolId = school._id;
 
   const fetchDrivers = useCallback(async () => {
     try {

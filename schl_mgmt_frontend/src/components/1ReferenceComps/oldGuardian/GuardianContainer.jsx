@@ -6,7 +6,6 @@ import GuardianModal from './GuardianModal';
 
 const GuardianContainer = () => {
     const [guardians, setGuardians] = useState([]);
-    const [students, setStudents] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [cnicError, setCnicError] = useState('');
@@ -57,26 +56,7 @@ const GuardianContainer = () => {
       fetchGuardians();
     }, [fetchGuardians]);
   
-    const fetchStudents =  useCallback(async () => {
-      try {
-        const token = Cookies.get('token');
-        const response = await fetch('http://localhost:3000/students/students/schoolId', {
-          method: 'POST',  
-        headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        setStudents(data.students);
-      } catch (error) {
-        console.log('Error fetching students:', error);
-      }
-    }, []); // Empty dependency array because we only want to run this hook once
-  
-    useEffect(() => {
-      fetchStudents();
-    }, [fetchStudents]); // Empty dependency array because we only want to run this hook once
-  
+    
     const handleModalClose = () => {
       setShowModal(false);
       setFormData({
@@ -185,13 +165,7 @@ const GuardianContainer = () => {
     };
     
   
-    const handleSelectChildren = (selectedChildren) => {
-      setFormData((prevData) => ({
-        ...prevData,
-        children: selectedChildren,
-      }));
-    };
-  
+   
     const handleModalShow = () => {
       setShowModal(true);
       setError(null); // Clear error on modal show

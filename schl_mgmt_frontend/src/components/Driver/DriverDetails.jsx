@@ -2,49 +2,55 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import { useParams, useNavigate } from 'react-router-dom';
+import AddVehicleModal from './AddVehicleModal';
+
 const DriverDetails = () => {
   const navigate = useNavigate();
   const [driver, setDriver] = useState(null);
   const [schoolUsernames, setSchoolUsernames] = useState([]);
+  const [showAddVModal, setShowAddVModal] = useState(false);
   const token = Cookies.get('token');
   const { driverId } = useParams();
 
-  useEffect(() => {
-    const fetchDriverDetails = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/driver/getDetails`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ driverId }),
-        });
-        const data = await response.json();
-        //setDriver(data);
-        const students = data.students.map(student => student.student);
-        const studentNames = await fetchStudentNames(students);
-        // setStudents(studentNames);
-        //console.log('Student Names:', studentNames);
-        data.students =data.students.map((student, index) => ({ ...student, name: studentNames[index] }));
-        console.log('Updated Students:', data.students);
-        console.log(studentNames);
-        setDriver(data);
-        //console.log('Updated Students:', driver.students);
-        // Fetch school usernames
-        const schoolIds = data.schools.map(school => school);
-        const schoolUsernamesPromises = schoolIds.map(id => fetchSchoolUsername(id));
-        const usernames = await Promise.all(schoolUsernamesPromises);
-        setSchoolUsernames(usernames);
-      } catch (error) {
-        console.error('Error fetching driver details:', error);
-      }
-    };
+  const fetchDriverDetails = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/driver/getDetails`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ driverId }),
+      });
+      const data = await response.json();
+      //setDriver(data);
+      const students = data.students.map(student => student.student);
+      const studentNames = await fetchStudentNames(students);
+      // setStudents(studentNames);
+      //console.log('Student Names:', studentNames);
+      data.students =data.students.map((student, index) => ({ ...student, name: studentNames[index] }));
+      console.log('Updated Students:', data.students);
+      console.log(studentNames);
+      setDriver(data);
+      //console.log('Updated Students:', driver.students);
+      // Fetch school usernames
+      const schoolIds = data.schools.map(school => school);
+      const schoolUsernamesPromises = schoolIds.map(id => fetchSchoolUsername(id));
+      const usernames = await Promise.all(schoolUsernamesPromises);
+      setSchoolUsernames(usernames);
+    } catch (error) {
+      console.error('Error fetching driver details:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchDriverDetails();      
   }, [driverId]);
 
-        
+  const handleModalShow = () => { 
+    setShowAddVModal(true);
+  };  
+  
   const fetchStudentNames = async (studentIds) => {
     try {
         const studentsWithNames = [];
@@ -93,6 +99,10 @@ const DriverDetails = () => {
 
   const handleRemoveStudent = async (studentId) => {
     try {
+      const confirm = window.confirm('Are you sure you want to remove student?');
+      if (!confirm) {
+        return;
+      }
       const response = await fetch('http://localhost:3000/driver/removeStudent', {
         method: 'POST',
         headers: {
@@ -145,6 +155,10 @@ const DriverDetails = () => {
 
   const handleRemoveVehicle = async (regNumber) => {
     try {
+      const confirm = window.confirm('Are you sure you want to remove vehicle?');
+      if (!confirm) {
+        return;
+      }
       const response = await fetch(`http://localhost:3000/driver/${driverId}/vehicles/${regNumber}`, {
         method: 'DELETE',
         headers: {
@@ -191,7 +205,10 @@ const DriverDetails = () => {
       <Row className="justify-content-center">
         <Col md={8}>
           <div className="bg-light p-4 rounded">
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <h2 className="mb-4">Driver Details</h2>
+            <Button variant="light" style={{ color: "green" }} size="med" onClick={() => handleModalShow()}>Add Vehicle</Button>
+            </div>  
             {driver && (
               <div>
                 <p><strong>Name:</strong> {driver.name}</p>
@@ -234,7 +251,8 @@ const DriverDetails = () => {
           </div>
         </Col>
       </Row>
-      <Button variant="primary" onClick={() => navigate('/')}>Back</Button>
+      <Button variant="primary" onClick={() => navigate('/home')}>Back</Button>
+      <AddVehicleModal showModal={showAddVModal} setShowAddVModal={setShowAddVModal} driverId={driverId} updateDriver={fetchDriverDetails} />
     </Container>
   );
 };

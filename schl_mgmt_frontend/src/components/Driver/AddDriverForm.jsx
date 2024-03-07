@@ -5,7 +5,9 @@ import Cookies from 'js-cookie';
 
 const AddDriverForm = () => {
     const token = Cookies.get('token');
-    const schoolId = Cookies.get('schoolId');
+    const school = JSON.parse( Cookies.get('school') );
+
+    const schoolId = school._id;
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -27,6 +29,7 @@ const AddDriverForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            console.log('schoolId:', school._id); 
             const response = await fetch('http://localhost:3000/driver/create', {
                 method: 'POST',
                 headers: {
