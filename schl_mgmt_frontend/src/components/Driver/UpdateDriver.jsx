@@ -104,6 +104,7 @@ const UpdateDriver = () => {
           </div>
         </Col>
       </Row>
+      <Button variant="primary" onClick={() => navigate('/home')}>Back</Button>
     </Container>
   );
 };

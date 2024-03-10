@@ -158,16 +158,13 @@ const getStudentsBySchool = async (req, res) => {
 
 
 const getTotalStudentsCount = async (req, res) => {
-  try {
-    //console.log('Getting total students count');
-    // Use the countDocuments method to get the total count of students
-    const totalStudentsCount = await Student.countDocuments();
-    //console.log('Total students count:', totalStudentsCount);
-    res.status(200).json({ totalStudentsCount });
-  } catch (error) {
-    console.error('Error getting total students count:', error);
+  try{
+    const {schoolId} = req.decoded;
+    const totalStudentsCount = await Student.countDocuments({school:schoolId});
+    res.status(200).json({ success: true, totalStudentsCount });
+  }catch(error){
     res.status(500).json({ error: 'Internal Server Error' });
-  }
+  } 
 };
 
 const getStudentbyID = async (req,res) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Container, Row, Col, Card, Form, Button } from 'react-bootstrap';
 import {useNavigate} from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -15,12 +15,12 @@ function FrontPage() {
   const [totalStudents, setTotalStudents] = useState(0);
   const [totalDrivers, setTotalDrivers] = useState(0); // New state for total drivers
   const navigate = useNavigate()
+  const token = Cookies.get('token');
+  const school = JSON.parse(Cookies.get('school'));
 
   const fetchData = useCallback(async () => {
     try {
-      const id = Cookies.get('schoolId');
-      const token = Cookies.get('token');
-      const response = await fetch(`http://localhost:3000/schools/getschool/${id}`, {
+      const response = await fetch(`http://localhost:3000/schools/getschool/${school._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,18 +32,19 @@ function FrontPage() {
         navigate('/login');
       }
       setSchoolData(data);
-      console.log(data);
+      
+      // console.log(data);
+      // console.log("The school id is ", schoolId.current);
       // Fetch total number of students
       const studentsResponse = await fetch(`http://localhost:3000/students/totalcount`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         }
       });
- 
-
       const studentsData = await studentsResponse.json();
+      console.log(studentsData);  
       setTotalStudents(studentsData.totalStudentsCount);
 
       // Fetch total number of drivers
@@ -51,9 +52,8 @@ function FrontPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({schoolId:id})
       });
       const driversData = await driversResponse.json();
       setTotalDrivers(driversData.length);
@@ -70,16 +70,14 @@ function FrontPage() {
     e.preventDefault();
 
     try {
-      const id = Cookies.get('schoolId');
-      const token = Cookies.get('token');
       const response = await fetch(`http://localhost:3000/schools/update-timing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          schoolId: id,
+          schoolId: school._id,
           day,
           openTime,
           closeTime

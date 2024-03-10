@@ -186,7 +186,8 @@ const DriverStudent = () => {
   ))}
 </tbody>
       </Table>
-      <Button variant="primary" onClick={handleAssign}>Assign Student</Button>
+      <Button variant="primary" onClick={() => navigate('/home')}>Back</Button>{' '}
+      <Button variant="success" onClick={handleAssign}>Assign Student</Button>
     </div>
   );
 };

@@ -6,7 +6,7 @@ import StudentForm from './StudentForm';
 const StudentModal = ({ showModal, handleModalClose, selectedStudentId, error, formData, handleFormChange, cnicError, handleFormSubmit }) => (
   <Modal show={showModal} onHide={handleModalClose}>
     <Modal.Header closeButton>
-      <Modal.Title>{selectedStudentId ? 'Edit Student' : 'Add Student'}</Modal.Title>
+      <Modal.Title>{selectedStudentId ? 'Edit Student Information' : 'Add Student'}</Modal.Title>
     </Modal.Header>
     <Modal.Body>
       {error && <Alert variant="danger">{error}</Alert>}
