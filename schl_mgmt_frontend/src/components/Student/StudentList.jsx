@@ -15,8 +15,8 @@ const StudentList = ({ students, handleEdit, handleDelete }) => {
       children: []
   });
 
-  const handleStudentDetails = (id) => {
-    console.log(id);
+  const handleStudentDetails = (student) => {
+    console.log(student);
   }
 
   return (
@@ -47,7 +47,7 @@ const StudentList = ({ students, handleEdit, handleDelete }) => {
                               <td>{student.studentClass}</td>
                               <td>
                                   <div style={{display:"flex", justifyContent:"space-evenly"}}>
-                                      <Button variant="btn btn-success" onClick={() => handleStudentDetails(student._id)}>
+                                      <Button variant="btn btn-success" onClick={() => handleStudentDetails(student)}>
                                           Details
                                       </Button>
                                       <Button variant="info" onClick={() => handleEdit(student._id)}>
