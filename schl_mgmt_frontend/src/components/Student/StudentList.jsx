@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Table } from 'react-bootstrap';
 import AddGuardian from '../newGuardian/AddGuardian'; // Import the MainCompGuardian component
 
 const StudentList = ({ students, handleEdit, handleDelete }) => {
     const [showModal, setShowModal] = useState(false); // State to control the modal visibility
     const studentId = useRef(null); // Ref to store the student ID
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
       name: '',
       cnic: '',
@@ -16,7 +18,7 @@ const StudentList = ({ students, handleEdit, handleDelete }) => {
   });
 
   const handleStudentDetails = (student) => {
-    console.log(student);
+    navigate(`/studentDetails/${student._id}`);
   }
 
   return (
