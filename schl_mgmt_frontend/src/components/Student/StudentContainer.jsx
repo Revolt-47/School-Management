@@ -27,8 +27,11 @@ const StudentContainer = () => {
   const fetchStudents = useCallback(async () => {
     try {
       const token = Cookies.get('token');
-      const response = await fetch('http://localhost:3000/students/students/schoolId', {
+      const schoolId = Cookies.get('schoolId'); 
+      const response = await fetch(`http://localhost:3000/students/students/${schoolId}`, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
@@ -194,7 +197,11 @@ const StudentContainer = () => {
   />
       <Row style={{marginTop:"100px"}}>
         <Col>
-          <Button variant="primary" onClick={() => setShowModal(true)}>
+          <Button variant="primary" onClick={() => {
+            
+            setShowModal(true)
+          }
+            }>
             Add Student
           </Button>
         </Col>

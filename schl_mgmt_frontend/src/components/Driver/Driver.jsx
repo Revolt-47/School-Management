@@ -10,7 +10,8 @@ const Driver = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const token = Cookies.get('token');
-  const schoolId = Cookies.get('schoolId');
+  const school = JSON.parse(Cookies.get('school'));
+  const schoolId = school._id;
 
   const fetchDrivers = useCallback(async () => {
     try {
@@ -20,7 +21,7 @@ const Driver = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ schoolId }),
+        body: JSON.stringify({ schoolId, token }),
       });
       const data = await response.json();
       setDrivers(data);
@@ -78,13 +79,15 @@ const Driver = () => {
 
   useEffect(() => {
     // Filter drivers based on the search term
+    if(drivers.length > 0) {
     const filtered = drivers.filter(driver =>
       driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.cnic.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.contactNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       driver.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+      );
     setFilteredDrivers(filtered);
+    }
   }, [drivers, searchTerm]);
 
 

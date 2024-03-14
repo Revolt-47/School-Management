@@ -496,7 +496,7 @@ const getDriverSchools = async (req, res) => {
 
 const getAllDriversofSchool = async (req, res) => {
   try {
-    const { schoolId } = req.body;
+    const { schoolId } = req.decoded;
 
     // Find the school first
     const school = await School.findById(schoolId);

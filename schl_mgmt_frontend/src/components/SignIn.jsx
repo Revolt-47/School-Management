@@ -51,8 +51,17 @@ function SignInPage({ updateAuthenticationStatus }) {
       setApiResponse(data);
 
       if (response.ok) {
+        //console.log('Login successful:', data);
+        //console.log('Login successful:', data.school);
+
+        const schoolToken = JSON.stringify(data.school);
+
         Cookies.set('token', data.token, { expires: 7 });
-        Cookies.set('schoolId', data.schoolId, { expires: 7 });
+        Cookies.set('school', schoolToken, { expires: 7 });
+
+        //const school =JSON.parse( Cookies.get('school') );
+        //console.log('School Stored in cookie:', school);
+        
         updateAuthenticationStatus(true);
         navigate('/home');
       }
