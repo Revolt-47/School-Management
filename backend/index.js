@@ -9,6 +9,7 @@ const studentRouter = require('./routes/StudentRoute');
 const guardianRouter = require('./routes/GuardianRouter');
 const paymentRouter = require('./routes/PaymentRouter');
 const driverRouter = require('./routes/DriverRouter');
+const attendanceRouter = require('./routes/attendanceRoute')
 cors = require("cors")
 
 
@@ -60,7 +61,7 @@ app.use('/students',studentRouter);
 app.use('/payments', paymentRouter);
 app.use('/guardians',guardianRouter);
 app.use('/driver',driverRouter);
-
+app.use('/attendance',attendanceRouter)
 
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
