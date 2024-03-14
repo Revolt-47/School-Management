@@ -6,6 +6,9 @@ const School = require('../models/SchoolModel');
 const moment = require('moment');
 const Guardian = require('../models/GuardianModel')
 const Driver = require('../models/DriverModel')
+
+const axios = require('axios');
+
 const moment_timezone = require('moment-timezone');
 
 
@@ -14,13 +17,22 @@ let checkoutQueue = [];
 // Function to add to the checkout queue
 async function addToQueue(req, res) {
     try {
-        const { role, id, studentId, schoolId } = req.body;
+        const { role, id, studentId, schoolId,time } = req.body;
         let relation = null;
+        let date = req.body.date;
+        date = moment.tz(date, 'YYYY-MM-DD', 'America/New_York');
+        console.log(date)
+
         
         // Populate student details
         const student = await Student.findById(studentId);
         if (!student) {
             return res.status(404).json({ success: false, message: 'Student not found' });
+        }
+
+          let existingCheckIn = await CheckIn.findOne({ student: student._id, date: date });
+           if (!existingCheckIn) {
+            return res.status(404).json({ success: false, message: 'Student did not check in today' });
         }
 
         // Check the role
@@ -49,9 +61,12 @@ async function addToQueue(req, res) {
         let exisiting = null;
         exisiting = checkoutQueue.find(item => item.student._id.toString() === studentId.toString());
         // Add to the queue
-        if(exisiting == null)
+
+        if(exisiting == null){
         checkoutQueue.push({ role, id, student, schoolId, relation });
-        console.log(checkoutQueue)
+        await sendCallNotification(id,role,id,date,time);
+    }
+
 
         return res.status(201).json({ success: true, message: 'Added to queue successfully' });
     } catch (error) {
@@ -62,7 +77,8 @@ async function addToQueue(req, res) {
 // Function to check-in a student
 async function checkInStudent(req, res) {
     try {
-        const { rfidTag, time, date,schoolId } = req.body; // Assuming these fields are sent in the request body
+
+        const { rfidTag, time, date,schoolId} = req.body; // Assuming these fields are sent in the request body
         // Find the student by RFID tag
         const student = await Student.findOne({ rfidTag });
         if (!student) {
@@ -93,8 +109,7 @@ async function checkInStudent(req, res) {
         let existingCheckIn = await CheckIn.findOne({ student: student._id, date: specificDate });
         if (existingCheckIn) {
             // Update the existing check-in entry
-            existingCheckIn.time = time;
-            await existingCheckIn.save();
+            res.status(489).json("Child already checked in for today")
         } else {
             // Create a new check-in entry
             existingCheckIn = new CheckIn({
@@ -110,8 +125,8 @@ async function checkInStudent(req, res) {
         let attendance = await Attendance.findOne({ student_id: student._id, date: specificDate });
         if (attendance) {
             // Update the existing attendance record
-            attendance.status = isLate ? 'Late' : 'Present';
-            await attendance.save();
+            res.status(489).json("Child already checked in for today")
+
         } else {
             // Create a new attendance record
             attendance = new Attendance({
@@ -124,11 +139,19 @@ async function checkInStudent(req, res) {
             await attendance.save();
         }
 
+        const guardians = await Guardian.find({
+            children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
+        });
+
+        for (const guardian of guardians) {
+            await sendCheckInNotification(guardian._id, time, date,student.name);
+        }
         return res.status(201).json({ success: true, message: 'Student checked in successfully' });
     } catch (error) {
         console.error('Error checking in student:', error);
         return res.status(500).json({ success: false, message: 'Failed to check in student' });
     }
+
 }
 // Function to checkout a student
 async function checkoutStudent(req, res) {
@@ -187,6 +210,18 @@ async function checkoutStudent(req, res) {
             { status: isEarly ? 'Early Leave' : 'Present' },
             { new: true }
         );
+
+        const guardians = await Guardian.find({
+            children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
+        });
+
+        for (const guardian of guardians) {
+            await sendCheckOutNotification(guardian._id, time, date,student.name,role,pickupPerson);
+        }
+
+        if(pickupPerson){
+            await sendCheckOutNotification(pickupPerson, time, date,student.name,role,pickupPerson);
+        }
 
         return res.status(200).json({ success: true, message: 'Student checked out successfully', pickupPerson });
     } catch (error) {
@@ -323,13 +358,134 @@ async function getAttendanceofaClass(req, res) {
 // Function to get queue elements of a particular school
 function getQueueBySchoolId(req,res) {
     const {schoolId} = req.body
-    console.log("This is the checkout queue \n", checkoutQueue)
+    console.log(checkoutQueue)
+
     const queueBySchool = checkoutQueue.filter(item => item.schoolId.toString() === schoolId.toString());
     if (queueBySchool.length != 0){
         res.status(200).json(queueBySchool)
     }
     else{
-        res.status(201).json("No calls")
+        res.status(400).message("No calls")
+    }
+}
+
+
+async function sendCheckInNotification(subID, time,date,child) {
+    try {
+      const requestBody = {
+        subID: subID,
+        appId: 19959,
+        appToken: "tOGmciFdfRxvdPDp3MiotN",
+        title: "Your child checked in ",
+        message: `${child} checked in school at ${time} on ${date}`,
+      };
+  
+      // Adjust time logic here if needed
+      // For example, you might want to set a specific time in the requestBody
+  
+      const response = await axios.post('https://app.nativenotify.com/api/indie/notification', requestBody);
+      
+      // Assuming the API returns some data, you can handle it here if needed
+      console.log(response.data);
+  
+      return response.data; // Return any data you need from the response
+    } catch (error) {
+      console.error('Error sending notification:', error.response ? error.response.data : error.message);
+      throw error; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+async function sendCheckOutNotification(subID, time, date, child, role, person) {
+    try {
+        let message;
+        if (role && person) {
+            // Fetch pickup person details based on role and person ID
+            let pickupPersonName = '';
+            if (role.toLowerCase() === 'driver') {
+                // Fetch driver details based on person ID
+                const driver = await Driver.findById(person);
+                if (driver) {
+                    pickupPersonName = driver.name;
+                }
+            } else if (role.toLowerCase() === 'guardian') {
+                // Fetch guardian details based on person ID
+                const guardian = await Guardian.findById(person);
+                if (guardian) {
+                    pickupPersonName = guardian.name;
+                }
+            }
+            message = `${child} checked out of school at ${time} on ${date} by ${role} ${pickupPersonName}.`;
+        } else {
+            message = `${child} checked out of school at ${time} on ${date} by himself.`;
+        }
+
+        const requestBody = {
+            subID: subID,
+            appId: 19959,
+            appToken: "tOGmciFdfRxvdPDp3MiotN",
+            title: "Your child checked out",
+            message: message,
+        };
+
+        // Adjust time logic here if needed
+        // For example, you might want to set a specific time in the requestBody
+
+        const response = await axios.post('https://app.nativenotify.com/api/indie/notification', requestBody);
+
+        // Assuming the API returns some data, you can handle it here if needed
+        console.log(response.data);
+
+        return response.data; // Return any data you need from the response
+    } catch (error) {
+        console.error('Error sending notification:', error.response ? error.response.data : error.message);
+        throw error; // Re-throw the error to handle it in the calling function
+    }
+}
+
+async function sendCallNotification(subID, child, role, person,date,time) {
+    try {
+        let message;
+        if (role && person) {
+            // Fetch pickup person details based on role and person ID
+            let pickupPersonName = '';
+            if (role.toLowerCase() === 'driver') {
+                // Fetch driver details based on person ID
+                const driver = await Driver.findById(person);
+                if (driver) {
+                    pickupPersonName = driver.name;
+                }
+            } else if (role.toLowerCase() === 'guardian') {
+                // Fetch guardian details based on person ID
+                const guardian = await Guardian.findById(person);
+                if (guardian) {
+                    pickupPersonName = guardian.name;
+                }
+            }
+            message = `${child} called out of school by ${role} ${pickupPersonName} at ${time} on ${date}.`;
+        } else {
+            res.status(400).error("Empty role or id");
+        }
+
+        const requestBody = {
+            subID: subID,
+            appId: 19959,
+            appToken: "tOGmciFdfRxvdPDp3MiotN",
+            title: "Your child was called !",
+            message: message,
+        };
+
+        // Adjust time logic here if needed
+        // For example, you might want to set a specific time in the requestBody
+
+        const response = await axios.post('https://app.nativenotify.com/api/indie/notification', requestBody);
+
+        // Assuming the API returns some data, you can handle it here if needed
+        console.log(response.data);
+
+        return response.data; // Return any data you need from the response
+    } catch (error) {
+        console.error('Error sending notification:', error.response ? error.response.data : error.message);
+        throw error; // Re-throw the error to handle it in the calling function
     }
 }
 
