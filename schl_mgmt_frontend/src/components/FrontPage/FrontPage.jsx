@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import { BiCar, BiChevronDown, BiBuilding, BiSolidWatch } from 'react-icons/bi';
 import StudentCountBox from './StudentCountBox';
 import logo from './van guardian logo.png';
-// import CallQueue from '../CallQueue';
+import CallQueue from '../CallQueue';
 
 function FrontPage() {
   const [schoolData, setSchoolData] = useState(null);
@@ -96,7 +96,7 @@ function FrontPage() {
 
   return (
     <div style={{ height: '100vh' }}>
-      {/* <CallQueue /> */}
+      <CallQueue />
       <div className="front-page" style={{ backgroundImage: `url(${logo})` }}>
         <Container fluid className="mt-3">
           {schoolData && (
