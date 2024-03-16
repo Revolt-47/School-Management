@@ -6,7 +6,9 @@ const School = require('../models/SchoolModel');
 const moment = require('moment');
 const Guardian = require('../models/GuardianModel')
 const Driver = require('../models/DriverModel')
+
 const axios = require('axios');
+
 const moment_timezone = require('moment-timezone');
 
 
@@ -20,6 +22,7 @@ async function addToQueue(req, res) {
         let date = req.body.date;
         date = moment.tz(date, 'YYYY-MM-DD', 'America/New_York');
         console.log(date)
+
         
         // Populate student details
         const student = await Student.findById(studentId);
@@ -58,6 +61,7 @@ async function addToQueue(req, res) {
         let exisiting = null;
         exisiting = checkoutQueue.find(item => item.student._id.toString() === studentId.toString());
         // Add to the queue
+
         if(exisiting == null){
         checkoutQueue.push({ role, id, student, schoolId, relation });
         await sendCallNotification(id,student,role,id,date,time);
@@ -70,7 +74,7 @@ async function addToQueue(req, res) {
         }
         
     }
-        console.log(checkoutQueue)
+
 
         return res.status(201).json({ success: true, message: 'Added to queue successfully' });
     } catch (error) {
@@ -81,6 +85,7 @@ async function addToQueue(req, res) {
 // Function to check-in a student
 async function checkInStudent(req, res) {
     try {
+
         const { rfidTag, time, date,schoolId} = req.body; // Assuming these fields are sent in the request body
         // Find the student by RFID tag
         const student = await Student.findOne({ rfidTag });
@@ -129,6 +134,7 @@ async function checkInStudent(req, res) {
         if (attendance) {
             // Update the existing attendance record
             res.status(489).json("Child already checked in for today")
+
         } else {
             // Create a new attendance record
             attendance = new Attendance({
@@ -148,14 +154,11 @@ async function checkInStudent(req, res) {
         for (const guardian of guardians) {
             await sendCheckInNotification(guardian._id, time, date,student.name);
         }
-
-
         return res.status(201).json({ success: true, message: 'Student checked in successfully' });
     } catch (error) {
         console.error('Error checking in student:', error);
         return res.status(500).json({ success: false, message: 'Failed to check in student' });
     }
-
 
 }
 // Function to checkout a student
@@ -369,6 +372,7 @@ async function getAttendanceofaClass(req, res) {
 function getQueueBySchoolId(req,res) {
     const {schoolId} = req.body
     console.log(checkoutQueue)
+
     const queueBySchool = checkoutQueue.filter(item => item.schoolId.toString() === schoolId.toString());
     if (queueBySchool.length != 0){
         res.status(200).json(queueBySchool)

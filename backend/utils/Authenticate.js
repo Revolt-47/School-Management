@@ -7,9 +7,8 @@ let VerifyRegistrationToken = (req, res, next) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     // Extract the token by removing 'Bearer ' prefix
     const token = authHeader.substring(7);
-
     // Process check-in request using the token
-    console.log('Token:', token);
+    //console.log('Token:', token);
     if (!token) {
         res.status(401).json({ "Success": false, "Message": "No token provided" });
     }
@@ -32,7 +31,7 @@ let VerifyRegistrationToken = (req, res, next) => {
 
 let VerifySchool = (req, res, next) => {
     if (req.decoded.role == "school") {
-        console.log("Role of user: "+req.decoded.role)
+        console.log("Role of user: "+req.decoded.role);
         next();
     }
     else {

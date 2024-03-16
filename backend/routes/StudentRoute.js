@@ -7,8 +7,8 @@ const { VerifyRegistrationToken, VerifySchool, VerifyAdmin } = require('../utils
 studentRouter.post('/add',VerifyRegistrationToken,VerifySchool,studentController.addStudent);
 studentRouter.delete('/delete/:id',VerifyRegistrationToken,VerifySchool,studentController.deleteStudent);
 studentRouter.put('/edit/:studentId',VerifyRegistrationToken,VerifySchool,studentController.updateStudent);
-studentRouter.get('/students/:schoolId',VerifyRegistrationToken,VerifySchool,studentController.getStudentsBySchool);
-studentRouter.get('/totalcount',VerifyRegistrationToken,VerifyAdmin,studentController.getTotalStudentsCount);
-studentRouter.get('/getdetails',VerifyRegistrationToken,VerifySchool,studentController.getStudentbyID)
+studentRouter.post('/students/:schoolId',VerifyRegistrationToken,VerifySchool,studentController.getStudentsBySchool);
+studentRouter.post('/totalcount',VerifyRegistrationToken,VerifySchool,studentController.getTotalStudentsCount);
+studentRouter.post('/getdetails',VerifyRegistrationToken,VerifySchool,studentController.getStudentbyID)
 
 module.exports = studentRouter;

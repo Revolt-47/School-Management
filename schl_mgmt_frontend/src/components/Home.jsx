@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Student from "../components/Student/StudentContainer";
-import Guardian from "../components/Guardian/GuardianContainer";
 import { FaUserGraduate, FaUserShield, FaBus, FaThumbtack } from "react-icons/fa";
 import Driver from "./Driver/Driver";
 
@@ -64,16 +63,15 @@ function Home() {
         <div onClick={() => handleTabClick('student')} style={tabStyle}>
           <FaUserGraduate /> Student
         </div>
-        <div onClick={() => handleTabClick('guardian')} style={tabStyle}>
+        {/* <div onClick={() => handleTabClick('guardian')} style={tabStyle}>
           <FaUserShield /> Guardian
-        </div>
+        </div> */}
         <div onClick={() => handleTabClick('driver')} style={tabStyle}>
           <FaBus /> Drivers
         </div>
       </div>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         {activeTab === 'student' && <Student />}
-        {activeTab === 'guardian' && <Guardian />}
         {activeTab === 'driver' && <Driver />}
       </div>
     </div>
