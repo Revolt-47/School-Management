@@ -60,7 +60,15 @@ async function addToQueue(req, res) {
         // Add to the queue
         if(exisiting == null){
         checkoutQueue.push({ role, id, student, schoolId, relation });
-        await sendCallNotification(id,role,id,date,time);
+        await sendCallNotification(id,student,role,id,date,time);
+        const guardians = await Guardian.find({
+            children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
+        });
+
+        for (const guardian of guardians) {
+            await sendCallNotification(guardian._id,student,role,id,date,time);
+        }
+        
     }
         console.log(checkoutQueue)
 
@@ -185,6 +193,11 @@ async function checkoutStudent(req, res) {
 
         // Check if the student is leaving early
         const isEarly = checkoutTimeMinutes < closeTimeMinutes;
+
+        const existingCheckout = await Checkout.findOne({ student: student._id, date: date });
+        if (existingCheckout) {
+            return res.status(400).json({ success: false, message: 'Student has already checked out' });
+        }
 
         // Create a new checkout entry
         const checkout = new Checkout({
@@ -361,7 +374,7 @@ function getQueueBySchoolId(req,res) {
         res.status(200).json(queueBySchool)
     }
     else{
-        res.status(400).message("No calls")
+        res.status(400).json("No calls")
     }
 }
 
@@ -457,7 +470,7 @@ async function sendCallNotification(subID, child, role, person,date,time) {
                     pickupPersonName = guardian.name;
                 }
             }
-            message = `${child} called out of school by ${role} ${pickupPersonName} at ${time} on ${date}.`;
+            message = `${child.name} called out of school by ${role} ${pickupPersonName} at ${time} on ${date}.`;
         } else {
             res.status(400).error("Empty role or id");
         }
@@ -484,6 +497,7 @@ async function sendCallNotification(subID, child, role, person,date,time) {
         throw error; // Re-throw the error to handle it in the calling function
     }
 }
+
 
 
 
