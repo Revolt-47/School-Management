@@ -358,14 +358,15 @@ async function getAttendanceofaClass(req, res) {
 // Function to get queue elements of a particular school
 function getQueueBySchoolId(req,res) {
     const {schoolId} = req.body
-    console.log(checkoutQueue)
+    console.log(checkoutQueue.length)
 
     const queueBySchool = checkoutQueue.filter(item => item.schoolId.toString() === schoolId.toString());
     if (queueBySchool.length != 0){
         res.status(200).json(queueBySchool)
     }
     else{
-        res.status(400).message("No calls")
+        console.log('Empty Queue')
+        res.status(404).json({message: 'No calls in queue'})
     }
 }
 

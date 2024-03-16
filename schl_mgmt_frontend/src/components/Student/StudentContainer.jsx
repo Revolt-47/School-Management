@@ -6,6 +6,8 @@ import StudentList from './StudentList';
 import StudentModal from './StudentModal';
 
 const StudentContainer = () => {
+  const school = JSON.parse(Cookies.get('school'));
+  const schoolId = school._id;
     const [students, setStudents] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [cnicError, setCnicError] = useState('');
@@ -27,7 +29,6 @@ const StudentContainer = () => {
   const fetchStudents = useCallback(async () => {
     try {
       const token = Cookies.get('token');
-      const schoolId = Cookies.get('schoolId'); 
       const response = await fetch(`http://localhost:3000/students/students/${schoolId}`, {
         method: 'POST',
         headers: {
