@@ -63,7 +63,7 @@ function SignInPage({ updateAuthenticationStatus }) {
         //console.log('School Stored in cookie:', school);
         
         updateAuthenticationStatus(true);
-        navigate('/home');
+        navigate('/');
       }
     } catch (error) {
       console.error('Error during API request:', error);

@@ -18,11 +18,11 @@ function CallQueue() {
           },
           body: JSON.stringify({ schoolId })
         });
-        console.log(response);
         if(response.status === 200) {
           const data = await response.json();
           setQueue(data);
           setLoading(false);
+          console.log(data);
         }
         else if(response.status === 404) {
           throw new Error('No calls in queue');
@@ -51,10 +51,10 @@ function CallQueue() {
               <div style={styles.fatRow}>
                 <div style={{ ...styles.colorBlock, backgroundColor: getRandomColor() }}></div>
                 <div className="queue-item-content">
-                  <p>Role: {item.role}</p>
-                  <p>ID: {item.id}</p>
-                  <p>Student: {item.student}</p>
-                  <p>School ID: {item.schoolId}</p>
+                  <p>Student: {item.student.name}</p>
+                  <p>Roll Number: {item.student.rollNumber}</p>
+                  <p>Class: {item.student.studentClass}</p>
+                  <p>Section:{item.student.section}</p>
                   <p>Relation: {item.relation}</p>
                 </div>
               </div>
@@ -92,6 +92,7 @@ const styles = {
     },
     queueItem: {
        marginBottom: '10px',
+       display: 'flex',
     }
 };
 
