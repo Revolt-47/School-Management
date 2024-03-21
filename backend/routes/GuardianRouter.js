@@ -12,7 +12,7 @@ router.post('/remove-child',VerifyRegistrationToken,VerifyGuardian, guardianCont
 router.post('/login', guardianController.loginGuardian);
 router.post('/forgot-password', guardianController.forgotPassword);
 router.post('/reset-password', guardianController.resetPassword);
-router.post('/getguardian/:studentId',VerifyRegistrationToken,VerifyGuardian,guardianController.getGuardians);
+router.post('/getguardian/:studentId',guardianController.getGuardians);
 
 router.post('/getAllGuardians', VerifyRegistrationToken,VerifySchool, guardianController.getAllGuardians);
 
