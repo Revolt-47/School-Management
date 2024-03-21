@@ -27,12 +27,12 @@ async function addToQueue(req, res) {
         // Populate student details
         const student = await Student.findById(studentId);
         if (!student) {
-            return res.status(404).json({ success: false, message: 'Student not found' });
+            return res.status(426).json({ success: false, message: 'Student not found' });
         }
 
           let existingCheckIn = await CheckIn.findOne({ student: student._id, date: date });
            if (!existingCheckIn) {
-            return res.status(404).json({ success: false, message: 'Student did not check in today' });
+            return res.status(426).json({ success: false, message: 'Student did not check in today' });
         }
 
         // Check the role
@@ -64,7 +64,7 @@ async function addToQueue(req, res) {
 
         if(exisiting == null){
         checkoutQueue.push({ role, id, student, schoolId, relation });
-        await sendCallNotification(id,student,role,id,date,time);
+        console.log('I was here')
         const guardians = await Guardian.find({
             children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
         });
