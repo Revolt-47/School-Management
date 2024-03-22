@@ -47,15 +47,14 @@ function CallQueue() {
       {error && <p>{error}</p>}
         <div style={styles.callQueue}>
           {queue.map((item) => (
-            <div key={item._id} style={styles.queueItem}>
+            <div key={item.student._id} style={styles.queueItem}>
               <div style={styles.fatRow}>
-                <div style={{ ...styles.colorBlock, backgroundColor: getRandomColor() }}></div>
                 <div className="queue-item-content">
-                  <p>Student: {item.student.name}</p>
-                  <p>Roll Number: {item.student.rollNumber}</p>
-                  <p>Class: {item.student.studentClass}</p>
-                  <p>Section:{item.student.section}</p>
-                  <p>Relation: {item.relation}</p>
+                  <p><strong>Name:</strong> {item.student.name}</p>
+                  <p><strong>Roll Number:</strong> {item.student.rollNumber}</p>
+                  <p><strong>Class:</strong> {item.student.studentClass}</p>
+                  <p><strong>Section:</strong> {item.student.section}</p>
+                  <p><strong>Relation:</strong> {item.relation}</p>
                 </div>
               </div>
             </div>
@@ -65,34 +64,29 @@ function CallQueue() {
   );  
 }
 
-// Function to generate a random color
-function getRandomColor() {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16);
-}
-
 // Inline styles
 const styles = {
   fatRow: {
     display: 'flex',
     alignItems: 'center',
-    padding: '10px',
+    padding: '5px', // Reduced padding
     borderRadius: '8px',
-    backgroundColor: '#f0f0f0'
-  },
-  colorBlock: {
-    width: '20px',
-    height: '20px',
-    borderRadius: '50%',
-    marginRight: '10px'
+    backgroundColor: '#f0f0f0',
+    boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
+    margin: '5px 0', // Reduced margin
   },
     callQueue: {
         display: 'flex',
-        flexDirection: 'column',
-        gap: '10px'
+        flexDirection: 'row',
+        gap: '10px',
+        backgroundColor: '#F8F9FA',
+        borderRadius: '18px',
+        overflow: 'auto',
     },
     queueItem: {
-       marginBottom: '10px',
        display: 'flex',
+       alignItems: 'center',
+       marginLeft: '10px',
     }
 };
 

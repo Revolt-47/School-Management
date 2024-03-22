@@ -95,7 +95,7 @@ function FrontPage() {
   };
 
   return (
-    <div style={{ height: '100vh' }}>
+    <div>
       <CallQueue />
       <div className="front-page" style={{ backgroundImage: `url(${logo})` }}>
         <Container fluid className="mt-3">
