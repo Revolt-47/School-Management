@@ -12,7 +12,10 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [checkInOut, setCheckInOut] = useState({});
+    const [checkIn, setCheckIn] = useState({});
+    const [checkOut, setCheckOut] = useState({});
+    const [isButtonClicked, setIsButtonClicked] = useState(false); // State to track button click
+
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
@@ -78,20 +81,26 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                     schoolId
                 }),
             });
-    
             if (!response.ok) {
                 throw new Error('Failed to fetch check-in and check-out data');
             }
-    
             const data = await response.json();
             console.log("Check-in and check-out data for date", date, ":", data);
-            setCheckInOut({ ...checkInOut, [date]: data });
+            // Update the state with the fetched check-in and check-out data
+            const {time:checkInTime} = data.checkIns[0];
+            const {time:checkOutTime} = data.checkOuts[0];
+            setCheckIn(checkInTime);
+            setCheckOut(checkOutTime);
+
+            // Remove the error if any, since the fetch is successful
+            setError(null);
         } catch (error) {
             console.error('Error fetching check-in and check-out:', error);
             setError('Failed to fetch check-in and check-out data');
         }
     };
-    
+
+
 
     return (
         <div className="container text-center">
@@ -122,25 +131,39 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                     {attendanceData.length === 0 ? (
                         <p>No attendance records found for the selected date range.</p>
                     ) : (
-                        <table className="table table-striped" style={{border:"1px solid black"}}>
+                        <table className="table table-striped" style={{ border: "1px solid black" }}>
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Status</th>
-                                    <th>Check-In / Check-Out</th> {/* New column */}
+                                    <th>Check-In / Check-Out</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {attendanceData.map((attendance, index) => (
-                                    <tr key={index}>
-                                        <td>{new Date(attendance.date).toLocaleDateString()}</td>
-                                        <td>{attendance.status}</td>
-                                        <td>
-                                            <button onClick={() => handleCheckInOut(attendance.date)}>Show Check-In/Out</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
+    {attendanceData.map((attendance, index) => {
+       
+        return (
+            <tr key={index}>
+                <td>{new Date(attendance.date).toLocaleDateString()}</td>
+                <td>{attendance.status}</td>
+                <td>
+                    {isButtonClicked ? (
+                        // Show check-in and check-out times if button is clicked
+                        <>
+                            <p>Check-In: {checkIn}</p>
+                            <p>Check-Out: {checkOut}</p>
+                        </>
+                    ) : (
+                        // Show button to check-in/out if button is not clicked
+                        <button className="btn btn-primary" onClick={() => { handleCheckInOut(attendance.date); setIsButtonClicked(true); }}>Check-In / Check-Out</button>
+                    )}
+                </td>
+            </tr>
+        );
+    })}
+</tbody>
+
+
                         </table>
                     )}
                 </div>
