@@ -96,7 +96,7 @@ function FrontPage() {
 
   return (
     <div>
-      <CallQueue />
+      
       <div className="front-page" style={{ backgroundImage: `url(${logo})` }}>
         <Container fluid className="mt-3">
           {schoolData && (
@@ -221,6 +221,7 @@ function FrontPage() {
           )}
         </Container>
       </div>
+      <CallQueue />
     </div>
   );
 }

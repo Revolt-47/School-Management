@@ -16,6 +16,7 @@ function CallQueue() {
         },
         body: JSON.stringify({ schoolId })
       });
+      console.log("Queue Fetched");
       if (response.status === 200) {
         const data = await response.json();
         setQueue(data);
@@ -42,7 +43,7 @@ function CallQueue() {
 
   return (
     <div>
-      <h2>Call Queue</h2>
+      <h2 style={{ display:"flex", justifyContent:"center"}}>Call Queue</h2>
       {error && <p>{error}</p>}
       <div style={styles.callQueue}>
         {queue.length > 0 ? (
