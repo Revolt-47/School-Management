@@ -83,14 +83,18 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     gap: '10px',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F6F4F4',
     borderRadius: '18px',
     overflow: 'auto',
+    border: '5 px solid #3e3636',
+    padding: '1%',
+    marginBottom: '10px', 
   },
   queueItem: {
     display: 'flex',
     alignItems: 'center',
     marginLeft: '10px',
+    backgroundColor:"#e6e6e6",
   }
 };
 
