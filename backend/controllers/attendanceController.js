@@ -246,6 +246,9 @@ async function checkoutStudent(req, res) {
 async function getStudentCheckInCheckoutForDay(req, res) {
     try {
         const { studentId, date, schoolId } = req.body;
+        console.log("Student ID: ", studentId);
+        console.log("date: ", date);
+        console.log("School ID: ", schoolId)
         // const { schoolId } = req.decoded;
         // Find check-ins and check-outs for the specified student and school for the given day
         const startDate = new Date(date); // Start of the day
@@ -371,7 +374,7 @@ async function getAttendanceofaClass(req, res) {
 // Function to get queue elements of a particular school
 function getQueueBySchoolId(req,res) {
     const {schoolId} = req.body
-    console.log(checkoutQueue.length)
+    //console.log(checkoutQueue.length)
 
     const queueBySchool = checkoutQueue.filter(item => item.schoolId.toString() === schoolId.toString());
     if (queueBySchool.length != 0){
@@ -379,7 +382,7 @@ function getQueueBySchoolId(req,res) {
     }
     else{
 
-        console.log('Empty Queue')
+        //console.log('Empty Queue')
         res.status(404).json({message: 'No calls in queue'})
     }
 }

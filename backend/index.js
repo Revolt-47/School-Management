@@ -19,22 +19,29 @@ var allowedOrigins = [
   'http://localhost:3002'
 ];
 
-app.use(cors({
-  origin: function(origin, callback){
-    // allow requests with no origin 
-    // (like mobile apps or curl requests)
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      var msg = 'The CORS policy for this site does not ' +
-                'allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
-  allowedHeaders: 'Authorization, Origin, X-Requested-With, Content-Type, Accept'
-}));
-
+// app.use(cors({
+//   origin: function(origin, callback){
+//     // allow requests with no origin 
+//     // (like mobile apps or curl requests)
+//     if(!origin) return callback(null, true);
+//     if(allowedOrigins.indexOf(origin) === -1){
+//       var msg = 'The CORS policy for this site does not ' +
+//                 'allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   credentials: true,
+//   allowedHeaders: 'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+// }));
+// allow all origin
+app.use(cors(
+  {
+    origin: '*',
+    credentials: true,
+    allowedHeaders: 'Authorization, Origin, X-Requested-With, Content-Type, Accept'
+  }
+));
 const dbUrl = 'mongodb+srv://revolt:revolt47@cluster0.rxk1sz1.mongodb.net/?retryWrites=true&w=majority'; // Replace with your actual database name
 // const dbUrl = 'mongodb://localhost:27017/VanGuardian';
 mongoose.connect(dbUrl, {
