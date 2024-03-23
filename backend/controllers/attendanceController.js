@@ -64,7 +64,7 @@ async function addToQueue(req, res) {
 
         if(exisiting == null){
         checkoutQueue.push({ role, id, student, schoolId, relation });
-        console.log('I was here')
+        await sendCallNotification(id,student,role,id,date,time);
         const guardians = await Guardian.find({
             children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
         });
@@ -100,6 +100,10 @@ async function checkInStudent(req, res) {
         if (!school) {
             
             return res.status(404).json({ success: false, message: 'School not found' });
+        }
+
+        if(student.school != schoolId){
+            return res.status(404).json({ success: false, message: 'Student not registered in this school' });
         }
         const timings = school.timings.find(timing => timing.day === dayOfWeek);
         if (!timings) {
@@ -177,6 +181,10 @@ async function checkoutStudent(req, res) {
         const school = await School.findById(schoolId);
         if (!school) {
             return res.status(404).json({ success: false, message: 'School not found' });
+        }
+
+        if(student.school != school._id){
+            return res.status(404).json({ success: false, message: 'Student not registered in this school' });
         }
 
         // Get the day of the week
@@ -313,6 +321,13 @@ async function updateOrCreateAttendance(req, res) {
                         status: 'Present'
                     });
                     await newAttendance.save();
+                    const guardians = await Guardian.find({
+                        children: { $elemMatch: { child: student._id, relation: { $in: ['father', 'mother'] } } }
+                    });
+            
+                    for (const guardian of guardians) {
+                        await sendAbsentNotification(guardian._id,student.name,date);
+                    }
                 }
             }
         });
@@ -383,7 +398,6 @@ function getQueueBySchoolId(req,res) {
         res.status(404).json({message: 'No calls in queue'})
     }
 }
-
 
 async function sendCheckInNotification(subID, time,date,child) {
     try {
@@ -503,6 +517,31 @@ async function sendCallNotification(subID, child, role, person,date,time) {
         throw error; // Re-throw the error to handle it in the calling function
     }
 }
+
+async function sendAbsentNotification(subID,child,date) {
+    try {
+      const requestBody = {
+        subID: subID,
+        appId: 19959,
+        appToken: "tOGmciFdfRxvdPDp3MiotN",
+        title: "Your child checked in ",
+        message: `${child} didnot checked in school  on ${date}`,
+      };
+  
+      // Adjust time logic here if needed
+      // For example, you might want to set a specific time in the requestBody
+  
+      const response = await axios.post('https://app.nativenotify.com/api/indie/notification', requestBody);
+      
+      // Assuming the API returns some data, you can handle it here if needed
+      console.log(response.data);
+  
+      return response.data; // Return any data you need from the response
+    } catch (error) {
+      console.error('Error sending notification:', error.response ? error.response.data : error.message);
+      throw error; // Re-throw the error to handle it in the calling function
+    }
+  }
 
 
 
