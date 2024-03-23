@@ -88,7 +88,7 @@ const styles = {
     overflow: 'auto',
     border: '5 px solid #3e3636',
     padding: '1%',
-    marginBottom: '10px', 
+    margin: '1%', 
   },
   queueItem: {
     display: 'flex',

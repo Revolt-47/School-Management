@@ -12,6 +12,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [checkInOut, setCheckInOut] = useState({});
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
@@ -20,9 +21,11 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const handleEndDateChange = (e) => {
         setEndDate(e.target.value);
     };
+
     const handleCloseAdvanced = () => {
         setShowAdvanced(false);
     };
+
     useEffect(() => {
         if (startDate && endDate) {
             fetchAttendance();
@@ -60,6 +63,36 @@ function AdvStudentAttendance({ setShowAdvanced }) {
         }
     };
 
+    const handleCheckInOut = async (date) => {
+        try {
+            console.log("Fetching check-in and check-out data for date:", date);
+            const response = await fetch('http://localhost:3000/attendance/getCheckinCheckout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    studentId,
+                    date,
+                    schoolId
+                }),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to fetch check-in and check-out data');
+            }
+    
+            const data = await response.json();
+            console.log("Check-in and check-out data for date", date, ":", data);
+            setCheckInOut({ ...checkInOut, [date]: data });
+        } catch (error) {
+            console.error('Error fetching check-in and check-out:', error);
+            setError('Failed to fetch check-in and check-out data');
+        }
+    };
+    
+
     return (
         <div className="container text-center">
             <h2>Advanced Search</h2>
@@ -94,6 +127,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                                 <tr>
                                     <th>Date</th>
                                     <th>Status</th>
+                                    <th>Check-In / Check-Out</th> {/* New column */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,6 +135,9 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                                     <tr key={index}>
                                         <td>{new Date(attendance.date).toLocaleDateString()}</td>
                                         <td>{attendance.status}</td>
+                                        <td>
+                                            <button onClick={() => handleCheckInOut(attendance.date)}>Show Check-In/Out</button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

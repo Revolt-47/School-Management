@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Form } from 'react-bootstrap';
 import DriverList from './DriverList';
 import Cookies from 'js-cookie';
+import { Container, Row, Col } from 'react-bootstrap';
 
 const Driver = () => {
   const [drivers, setDrivers] = useState([]);
@@ -92,32 +93,38 @@ const Driver = () => {
 
 
   return (
-    <div>
+    <Container className="mt-5" style={{ height: '100vh', overflowY: 'auto' }}>
       <Form.Control
-    type="text"
-    placeholder="Search driver by any credential"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      width: '80%',
-      display: 'block',
-      margin: '0 auto',
-      position: 'sticky',
-      top: 70,
-      zIndex: 1000,
-      border: 'none',
-      borderRadius: '15px',
-      boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
-      backgroundColor: '#f5f5f5',
-      marginBottom: '80px',
-    }}
-  />
-      <Button variant="primary" onClick={handleAdd} style={{ marginBottom: '20px' }}>
-        Add New Driver
-      </Button>
-      <DriverList drivers={filteredDrivers} handleEdit={handleEdit} handleDelete={handleDelete} handleDetails={handleDetails} handleAssign={handleAssign} />
-    </div>
+        type="text"
+        placeholder="Search driver by any credential"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '50%',
+          display: 'block',
+          margin: '0 auto',
+          position: 'sticky',
+          top: 70,
+          zIndex: 1000,
+          border: 'none',
+          borderRadius: '15px',
+          boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
+          backgroundColor: '#f5f5f5',
+        }}
+      />
+      <Row style={{ marginTop: "100px" }}>
+        <Col>
+          <Button variant="primary" onClick={handleAdd}>
+            Add New Driver
+          </Button>
+        </Col>
+      </Row>
+      <Row className="mt-3">
+        <Col>
+          <DriverList drivers={filteredDrivers} handleEdit={handleEdit} handleDelete={handleDelete} handleDetails={handleDetails} handleAssign={handleAssign} />
+        </Col>
+      </Row>
+    </Container>
   );
-};
-
+}
 export default Driver;

@@ -183,7 +183,7 @@ async function checkoutStudent(req, res) {
             return res.status(404).json({ success: false, message: 'School not found' });
         }
 
-        if(student.school != school._id){
+        if(student.school != schoolId){
             return res.status(404).json({ success: false, message: 'Student not registered in this school' });
         }
 

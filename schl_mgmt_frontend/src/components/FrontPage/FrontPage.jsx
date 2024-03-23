@@ -6,6 +6,7 @@ import { BiCar, BiChevronDown, BiBuilding, BiSolidWatch } from 'react-icons/bi';
 import StudentCountBox from './StudentCountBox';
 import logo from './van guardian logo.png';
 import CallQueue from '../CallQueue';
+import './FrontPage.css';
 
 function FrontPage() {
   const [schoolData, setSchoolData] = useState(null);
