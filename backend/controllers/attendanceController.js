@@ -210,6 +210,11 @@ async function checkoutStudent(req, res) {
             return res.status(400).json({ success: false, message: 'Student has already checked out' });
         }
 
+        const existingCheckin = await CheckIn.findOne({ student: student._id, date: date });
+        if (!existingCheckin) {
+            return res.status(400).json({ success: false, message: 'Student did not checked in today' });
+        }
+
         // Create a new checkout entry
         const checkout = new Checkout({
             school: schoolId, // Assuming schoolId is decoded from JWT
@@ -542,10 +547,6 @@ async function sendAbsentNotification(subID,child,date) {
       throw error; // Re-throw the error to handle it in the calling function
     }
   }
-
-
-
-
 
 
 module.exports = { checkInStudent,addToQueue,
