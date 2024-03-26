@@ -170,6 +170,8 @@ async function checkoutStudent(req, res) {
     try {
         const { rfidTag, time, date , pickupPerson , role,schoolId} = req.body;
         // const { schoolId } = req.decoded;
+
+        const specificDate = moment.tz(date, 'YYYY-MM-DD', 'America/New_York');
         
         // Find the student by RFID tag
         const student = await Student.findOne({ rfidTag });
@@ -205,12 +207,14 @@ async function checkoutStudent(req, res) {
         // Check if the student is leaving early
         const isEarly = checkoutTimeMinutes < closeTimeMinutes;
 
-        const existingCheckout = await Checkout.findOne({ student: student._id, date: date });
+        const existingCheckout = await Checkout.findOne({ student: student._id, date: specificDate });
         if (existingCheckout) {
             return res.status(400).json({ success: false, message: 'Student has already checked out' });
         }
 
-        const existingCheckin = await CheckIn.findOne({ student: student._id, date: date });
+        
+
+        const existingCheckin = await CheckIn.findOne({ student: student._id, date: specificDate });
         if (!existingCheckin) {
             return res.status(400).json({ success: false, message: 'Student did not checked in today' });
         }
@@ -220,7 +224,7 @@ async function checkoutStudent(req, res) {
             school: schoolId, // Assuming schoolId is decoded from JWT
             student: student._id, // Save the student ID in the checkout entry
             time : time,
-            date: Date(date),
+            date: specificDate,
             pickupPerson,
             role,
         });
