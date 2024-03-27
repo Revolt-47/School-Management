@@ -3,7 +3,7 @@ import { Modal, Form, Button, Alert } from 'react-bootstrap';
 import Cookies from 'js-cookie';
 
 const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId }) => {
-    
+
     const [error, setError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [cnicError, setCnicError] = useState('');
@@ -21,7 +21,7 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
         });
         setEmailError(''); // Clear email error on modal close
         setCnicError(''); // Clear cnic error on modal close
-        
+
         setError(null); // Clear error on modal close
     };
 
@@ -59,7 +59,7 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
             !formData.address ||
             !formData.contactNumber ||
             !formData.email ||
-            !formData.relation  
+            !formData.relation
         ) {
             setError('Please fill all the required fields.');
             return;
@@ -68,53 +68,44 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
             return;
         }
         try {
-             // an object named as child that contains stundet id and student relation
-             const child = {
+            // an object named as child that contains stundet id and student relation
+            const child = {
                 childId: studentId.current,
                 relation: formData.relation
             };
-            const children = [child]; 
+            const children = [child];
             const token = Cookies.get('token');
             formData.children = children;
             console.log("Form data:", formData);
-            const response = await fetch('http://localhost:3000/guardians/create', {
+
+            await fetch('http://localhost:3000/guardians/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(formData),
-            });
-
-           await response.json();
-
-            if (!response.ok) {
-                // Check for duplicate key violation
-                if (response.status === 409) {
-                    setError('Duplicate key violation. Guardian with the same email or CNIC already exists.');
-                } else if (response.status === 400) {
-                    setError('A guardian with the same credentials already exists.');
-                }
-                else {
-                    // Handle other errors
-                    setError('An error occurred while saving the guardian information.');
-                }
-                return; // Do not proceed further on error
-            }
-            else
-            {
-                alert("Guardian added successfully");
-                setShowModal(false);
-                setFormData({
-                    name: '',
-                    cnic: '',
-                    address: '',
-                    contactNumber: '',
-                    email: '',
-                    relation: '',
-                    children: []
-                });
-            }
+            }).then(
+                    (response) => {
+                        console.log('Response:', response);
+                        if (response.status != 200) {
+                            setError(response.error);
+                        }
+                        else {
+                            alert("Guardian added successfully");
+                            setShowModal(false);
+                            setFormData({
+                                name: '',
+                                cnic: '',
+                                address: '',
+                                contactNumber: '',
+                                email: '',
+                                relation: '',
+                                children: []
+                            });
+                        }
+                    }
+                );
         } catch (error) {
             console.error('Error adding guardian:', error);
             setError(error.message);
@@ -184,19 +175,19 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
                             {emailError && <div className="error" style={{ color: 'red' }}>{emailError}</div>}
                         </Form.Group>
                         <Form.Group controlId="formRelationG">
-    <Form.Label>Relation</Form.Label>
-    <Form.Select
-        aria-label="Select relation"
-        name="relation"
-        value={formData.relation}
-        onChange={handleFormChange}
-    >
-        <option value="">Select relation</option>
-        <option value="father">Father</option>
-        <option value="mother">Mother</option>
-        <option value="guardian">Guardian</option>
-    </Form.Select>
-</Form.Group>
+                            <Form.Label>Relation</Form.Label>
+                            <Form.Select
+                                aria-label="Select relation"
+                                name="relation"
+                                value={formData.relation}
+                                onChange={handleFormChange}
+                            >
+                                <option value="">Select relation</option>
+                                <option value="father">Father</option>
+                                <option value="mother">Mother</option>
+                                <option value="guardian">Guardian</option>
+                            </Form.Select>
+                        </Form.Group>
 
 
                         <Button variant="primary" type="submit">
