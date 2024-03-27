@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import moment from "moment";
 import Cookies from "js-cookie";
 
 function AdvStudentAttendance({ setShowAdvanced }) {
@@ -12,8 +13,8 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [checkIn, setCheckIn] = useState({});
-    const [checkOut, setCheckOut] = useState({});
+    const [checkIn, setCheckIn] = useState();
+    const [checkOut, setCheckOut] = useState();
     const [isButtonClicked, setIsButtonClicked] = useState(false); // State to track button click
     const naivgate = useNavigate();
 
@@ -102,8 +103,14 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             const data = await response.json();
             console.log("Check-in and check-out data for date", date, ":", data);
             // Update the state with the fetched check-in and check-out data
-            const { time: checkInTime } = data.checkIns[0];
-            const { time: checkOutTime } = data.checkOuts[0];
+            //console.log("Check-ins:", data.checkIns[0].time);
+            //  data.checkIns[0].time;
+            // data.checkOuts[0].time;
+            console.log("Check-ins:", data.checkIns[0].time);
+            console.log("Check-outs:", data.checkOuts[0].time);
+
+            const checkInTime = moment(data.checkIns[0].time, 'HH:mm:ss').format('hh:mm A');
+            const checkOutTime = moment(data.checkOuts[0].time, 'HH:mm:ss').format('hh:mm A');
             setCheckIn(checkInTime);
             setCheckOut(checkOutTime);
 
