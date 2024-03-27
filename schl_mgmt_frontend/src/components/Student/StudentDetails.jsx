@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import StudentAttendance from "./StudentAttendance";
+import { Collapse, Button } from "react-bootstrap";
+import AdvStudentAttendance from "./AdvStudentAttendance";
 import Cookies from "js-cookie";
 
 function StudentDetails() {
+  const [openAdvanced, setOpenAdvanced] = useState(false);
   const { studentId } = useParams();
   const [student, setStudent] = useState(null);
   const token = Cookies.get("token");
   const school = JSON.parse(Cookies.get("school"));
   const schoolId = school._id;
 
-  // Define style object
   const tableCellStyle = {
     padding: "8px",
     border: "1px solid black"
@@ -33,14 +34,13 @@ function StudentDetails() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ studentId: studentId }), // Send studentId as part of a JSON object
+          body: JSON.stringify({ studentId: studentId }),
         });
         if (response.ok) {
           const studentData = await response.json();
           setStudent(studentData.std);
           console.log("Student details:", studentData);
         } else {
-          // Handle error response
           console.error("Failed to fetch student details:", response.status);
         }
       } catch (error) {
@@ -71,7 +71,6 @@ function StudentDetails() {
                 <td style={tableCellStyle}>{student.studentClass}</td>
                 <td style={tableCellStyle}><strong>Section</strong></td>
                 <td style={tableCellStyle}>{student.section}</td>
-                
                 <td style={tableCellStyle}><strong>RFID Tag</strong></td>
                 <td style={tableCellStyle}>{student.rfidTag}</td>
               </tr>
@@ -81,7 +80,23 @@ function StudentDetails() {
       ) : (
         <p>Loading...</p>
       )}
-      <StudentAttendance/>
+
+      {/* Button for toggling the advanced component */}
+      <Button
+        variant="primary"
+        onClick={() => setOpenAdvanced(!openAdvanced)}
+        aria-controls="adv-student-attendance"
+        aria-expanded={openAdvanced}
+      >
+        {openAdvanced ? "Hide Advanced" : "Show Advanced"}
+      </Button>
+
+      {/* Advanced component with collapse effect */}
+      <Collapse in={openAdvanced}>
+        <div id="adv-student-attendance">
+          <AdvStudentAttendance />
+        </div>
+      </Collapse>
     </div>
   );
 }
