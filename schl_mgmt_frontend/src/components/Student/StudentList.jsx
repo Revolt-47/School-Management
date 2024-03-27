@@ -47,7 +47,7 @@ const StudentList = ({ students, handleEdit }) => {
             // console.log('CheckIns:', checkIns.current);
             // console.log('CheckOuts:', checkOuts.current);
             setAttendance({ checkIns: data.checkIns, checkOuts: data.checkOuts });
-            console.log('Attendance From List:', attendance.checkIns[0]);
+            //console.log('Attendance From List:', attendance.checkIns[0]);
             setShowAttendanceModal(true); // Show the attendance modal after fetching data
         } catch (error) {
             console.error('Error fetching attendance:', error);

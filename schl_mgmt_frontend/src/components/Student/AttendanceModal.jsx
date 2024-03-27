@@ -4,7 +4,6 @@ import moment from 'moment'; // Import moment library for date handling
 import Cookies from 'js-cookie';
 
 const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => {
-    const token = Cookies.get('token');
     const school = JSON.parse(Cookies.get('school'));
     const schoolId = school._id;
     
@@ -13,7 +12,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             console.log(selectedStudent);
             // Fetch necessary data for manual check-in
             const rfidTag = selectedStudent.rfidTag; // Get RFID tag of selected student
-            const time = moment().toISOString(); // Get current time in ISO format
+            const time = moment().format('HH:mm:ss'); // Get current time in 'HH:mm:ss' format
             const date = moment().toISOString(); // Get current date in ISO format
 
             // Make API call for manual check-in
@@ -48,7 +47,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
         try {
             // Fetch necessary data for manual check-out
             const rfidTag = selectedStudent.rfidTag; // Get RFID tag of selected student
-            const time = moment().toISOString(); // Get current time in ISO format
+            const time = moment().format('HH:mm:ss'); // Get current time in 'HH:mm:ss' format
             const date = moment().toISOString(); // Get current date in ISO format
     
             // Make API call for manual check-out
@@ -84,12 +83,12 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             {attendance && (
                     <div>
                         {attendance.checkIns.length > 0 ? (
-                            <p><strong>Check-In:</strong> {new Date(attendance.checkIns[0].time).toLocaleTimeString()}</p>
+                            <p><strong>Check-In:</strong> {moment(attendance.checkIns[0].time, 'HH:mm:ss').format('hh:mm A')}</p>
                         ) : (
                             <p><strong>Check-In:</strong> Student didn't check in today.</p>
                         )}
                         {attendance.checkOuts.length > 0 ? (
-                            <p><strong>Check-Out:</strong> {new Date(attendance.checkOuts[0].time).toLocaleTimeString()}</p>
+                            <p><strong>Check-Out:</strong> {moment(attendance.checkOuts[0].time, 'HH:mm:ss').format('hh:mm A')}</p>
                         ) : (
                             <p><strong>Check-Out:</strong> Student didn't check out today.</p>
                         )}

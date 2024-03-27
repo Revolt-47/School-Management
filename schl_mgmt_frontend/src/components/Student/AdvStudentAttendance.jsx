@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import moment from "moment";
+import moment from "moment"; 
 import Cookies from "js-cookie";
 
 function AdvStudentAttendance({ setShowAdvanced }) {
@@ -13,8 +13,6 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [checkIn, setCheckIn] = useState();
-    const [checkOut, setCheckOut] = useState();
     const [isButtonClicked, setIsButtonClicked] = useState(false); // State to track button click
     const naivgate = useNavigate();
 
@@ -44,45 +42,46 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             console.error('Error deleting student:', error);
           }
     };
-
+    
     useEffect(() => {
+        const fetchAttendance = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('http://localhost:3000/attendance/getAttendance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        studentId,
+                        startDate,
+                        endDate,
+                        schoolId
+                    }),
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to fetch attendance data');
+                }
+    
+                const data = await response.json();
+                setAttendanceData(data.attendance);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error fetching attendance:', error);
+                setError('Failed to fetch attendance data');
+                setLoading(false);
+            }
+        };
+    
         if (startDate && endDate) {
             fetchAttendance();
         }
-    }, [startDate, endDate]);
+    }, [startDate, endDate, studentId, token, schoolId]); // Added fetchAttendance to the dependency array
+    
 
-    const fetchAttendance = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch('http://localhost:3000/attendance/getAttendance', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    studentId,
-                    startDate,
-                    endDate,
-                    schoolId
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch attendance data');
-            }
-
-            const data = await response.json();
-            setAttendanceData(data.attendance);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching attendance:', error);
-            setError('Failed to fetch attendance data');
-            setLoading(false);
-        }
-    };
-
-    const handleCheckInOut = async (date) => {
+    const handleCheckInOut = async (date, index) => {
         try {
             console.log("Fetching check-in and check-out data for date:", date);
             const response = await fetch('http://localhost:3000/attendance/getCheckinCheckout', {
@@ -102,18 +101,18 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             }
             const data = await response.json();
             console.log("Check-in and check-out data for date", date, ":", data);
-            // Update the state with the fetched check-in and check-out data
-            //console.log("Check-ins:", data.checkIns[0].time);
-            //  data.checkIns[0].time;
-            // data.checkOuts[0].time;
-            console.log("Check-ins:", data.checkIns[0].time);
-            console.log("Check-outs:", data.checkOuts[0].time);
-
-            const checkInTime = moment(data.checkIns[0].time, 'HH:mm:ss').format('hh:mm A');
-            const checkOutTime = moment(data.checkOuts[0].time, 'HH:mm:ss').format('hh:mm A');
-            setCheckIn(checkInTime);
-            setCheckOut(checkOutTime);
-
+    
+            // Convert check-in and check-out times to 12-hour format
+            const checkInTime = moment(data.checkIns[0]?.time, 'HH:mm:ss').format('hh:mm A');
+            const checkOutTime = moment(data.checkOuts[0]?.time, 'HH:mm:ss').format('hh:mm A');
+    
+            // Update the attendanceData state with check-in and check-out data for the specific row
+            setAttendanceData(prevAttendanceData => {
+                const newData = [...prevAttendanceData];
+                newData[index] = { ...newData[index], checkIn: checkInTime, checkOut: checkOutTime };
+                return newData;
+            });
+    
             // Remove the error if any, since the fetch is successful
             setError(null);
         } catch (error) {
@@ -121,6 +120,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             setError('Failed to fetch check-in and check-out data');
         }
     };
+        
 
 
 
@@ -162,24 +162,23 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {attendanceData.map((attendance, index) => {
-                                        return (
-                                            <tr key={index}>
-                                                <td>{new Date(attendance.date).toLocaleDateString()}</td>
-                                                <td>{attendance.status}</td>
-                                                <td>
-                                                    {isButtonClicked ? (
-                                                        <>
-                                                            <p>Check-In: {checkIn}</p>
-                                                            <p>Check-Out: {checkOut}</p>
-                                                        </>
-                                                    ) : (
-                                                        <button className="btn btn-primary" onClick={() => { handleCheckInOut(attendance.date); setIsButtonClicked(true); }}>Check-In / Check-Out</button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
+                                {attendanceData.map((attendance, index) => {
+    return (
+        <tr key={index}>
+            <td>{new Date(attendance.date).toLocaleDateString()}</td>
+            <td>{attendance.status}</td>
+            <td>
+                <button className="btn btn-primary" onClick={() => { handleCheckInOut(attendance.date, index); setIsButtonClicked(index); }}>Check-In / Check-Out</button>
+                {isButtonClicked === index && (
+                    <>
+                        <p>Check-In: {attendance.checkIn}</p>
+                        <p>Check-Out: {attendance.checkOut}</p>
+                    </>
+                )}
+            </td>
+        </tr>
+    );
+})}
                                 </tbody>
                             </table>
                         )}
