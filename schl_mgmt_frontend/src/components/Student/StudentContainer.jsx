@@ -159,23 +159,7 @@ const StudentContainer = () => {
     setShowModal(true);
     setError(null); // Clear error on modal show
   };
-
-  const handleDelete = async (studentId) => {
-    try {
-      const token = Cookies.get('token');
-      await fetch(`http://localhost:3000/students/delete/${studentId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      fetchStudents();
-    } catch (error) {
-      console.error('Error deleting student:', error);
-    }
-  };
-
-
+  
   return (
     <Container className="mt-5" style={{ height: '100vh', overflowY: 'auto' }}>
   <Form.Control
@@ -209,7 +193,7 @@ const StudentContainer = () => {
       </Row>
       <Row className="mt-3">
         <Col>
-          <StudentList students={students} handleEdit={handleEdit} handleDelete={handleDelete} />
+          <StudentList students={students} handleEdit={handleEdit} />
         </Col>
       </Row>
       <StudentModal

@@ -88,8 +88,10 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
             }).then(
                     (response) => {
                         console.log('Response:', response);
-                        if (response.status != 200) {
-                            setError(response.error);
+                        if (response.status !== 200) {
+                            if(response.status === 400)
+                                setError(response.error);
+                            throw new Error(response.error);
                         }
                         else {
                             alert("Guardian added successfully");

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Table } from 'react-bootstrap';
 import AddGuardian from '../newGuardian/AddGuardian'; // Import the MainCompGuardian component
 
-const StudentList = ({ students, handleEdit, handleDelete }) => {
+const StudentList = ({ students, handleEdit }) => {
     const [showModal, setShowModal] = useState(false); // State to control the modal visibility
     const studentId = useRef(null); // Ref to store the student ID
     const navigate = useNavigate();
@@ -34,7 +34,6 @@ const StudentList = ({ students, handleEdit, handleDelete }) => {
                       <th>Class</th>
                       <th>Actions</th>
                       <th>Guardian Control</th>
-                      <th>Danger</th>
                   </tr>
               </thead>
               <tbody>
@@ -66,11 +65,6 @@ const StudentList = ({ students, handleEdit, handleDelete }) => {
                                   </Button>
                                   {/* Pass necessary props to MainCompGuardian */}
                                   <AddGuardian studentId={studentId} showModal={showModal} setShowModal={setShowModal} setFormData={setFormData} formData={formData} />
-                              </td>
-                              <td>
-                                  <Button variant="danger" onClick={() => handleDelete(student._id)}>
-                                      Delete
-                                  </Button>
                               </td>
                           </tr>
                       ))

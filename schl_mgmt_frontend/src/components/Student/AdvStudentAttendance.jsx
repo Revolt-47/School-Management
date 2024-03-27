@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
 function AdvStudentAttendance({ setShowAdvanced }) {
@@ -15,7 +15,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
     const [checkIn, setCheckIn] = useState({});
     const [checkOut, setCheckOut] = useState({});
     const [isButtonClicked, setIsButtonClicked] = useState(false); // State to track button click
-
+    const naivgate = useNavigate();
 
     const handleStartDateChange = (e) => {
         setStartDate(e.target.value);
@@ -27,6 +27,25 @@ function AdvStudentAttendance({ setShowAdvanced }) {
 
     const handleCloseAdvanced = () => {
         setShowAdvanced(false);
+    };
+
+    const handleDeleteChild = async (studentId) => {
+        try {
+            if(window.confirm("Are you sure you want to delete this student?")) {
+            const token = Cookies.get('token');
+            await fetch(`http://localhost:3000/students/delete/${studentId}`, {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+        
+            alert('Student deleted successfully');
+            naivgate('/home');
+        }
+          } catch (error) {
+            console.error('Error deleting student:', error);
+          }
     };
 
     useEffect(() => {
@@ -87,8 +106,8 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             const data = await response.json();
             console.log("Check-in and check-out data for date", date, ":", data);
             // Update the state with the fetched check-in and check-out data
-            const {time:checkInTime} = data.checkIns[0];
-            const {time:checkOutTime} = data.checkOuts[0];
+            const { time: checkInTime } = data.checkIns[0];
+            const { time: checkOutTime } = data.checkOuts[0];
             setCheckIn(checkInTime);
             setCheckOut(checkOutTime);
 
@@ -127,49 +146,51 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             ) : !startDate || !endDate ? (
                 <p>Please select both start date and end date.</p>
             ) : (
-                <div className="table-responsive">
-                    {attendanceData.length === 0 ? (
-                        <p>No attendance records found for the selected date range.</p>
-                    ) : (
-                        <table className="table table-striped" style={{ border: "1px solid black" }}>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Check-In / Check-Out</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-    {attendanceData.map((attendance, index) => {
-       
-        return (
-            <tr key={index}>
-                <td>{new Date(attendance.date).toLocaleDateString()}</td>
-                <td>{attendance.status}</td>
-                <td>
-                    {isButtonClicked ? (
-                        // Show check-in and check-out times if button is clicked
-                        <>
-                            <p>Check-In: {checkIn}</p>
-                            <p>Check-Out: {checkOut}</p>
-                        </>
-                    ) : (
-                        // Show button to check-in/out if button is not clicked
-                        <button className="btn btn-primary" onClick={() => { handleCheckInOut(attendance.date); setIsButtonClicked(true); }}>Check-In / Check-Out</button>
-                    )}
-                </td>
-            </tr>
-        );
-    })}
-</tbody>
-
-
-                        </table>
-                    )}
+                <div>
+                    <div className="table-responsive">
+                        {attendanceData.length === 0 ? (
+                            <p>No attendance records found for the selected date range.</p>
+                        ) : (
+                            <table className="table table-striped" style={{ border: "1px solid black" }}>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Check-In / Check-Out</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {attendanceData.map((attendance, index) => {
+                                        return (
+                                            <tr key={index}>
+                                                <td>{new Date(attendance.date).toLocaleDateString()}</td>
+                                                <td>{attendance.status}</td>
+                                                <td>
+                                                    {isButtonClicked ? (
+                                                        <>
+                                                            <p>Check-In: {checkIn}</p>
+                                                            <p>Check-Out: {checkOut}</p>
+                                                        </>
+                                                    ) : (
+                                                        <button className="btn btn-primary" onClick={() => { handleCheckInOut(attendance.date); setIsButtonClicked(true); }}>Check-In / Check-Out</button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
             )}
+            <div className="border border-danger p-3 mt-4 d-flex justify-content-between align-items-center">
+                <h4 className="text-danger mb-0">Danger</h4>
+                <button className="btn btn-danger" onClick={() => handleDeleteChild(studentId)}>Remove Child</button>
+            </div>
         </div>
     );
+
 }
 
 export default AdvStudentAttendance;
