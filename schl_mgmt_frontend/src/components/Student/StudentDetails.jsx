@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Collapse, Button } from "react-bootstrap";
 import AdvStudentAttendance from "./AdvStudentAttendance";
 import Cookies from "js-cookie";
@@ -11,6 +11,7 @@ function StudentDetails() {
   const token = Cookies.get("token");
   const school = JSON.parse(Cookies.get("school"));
   const schoolId = school._id;
+  const navigate = useNavigate();
 
   const tableCellStyle = {
     padding: "8px",
@@ -91,13 +92,19 @@ function StudentDetails() {
         {openAdvanced ? "Hide Advanced" : "Show Advanced"}
       </Button>
 
+      
       {/* Advanced component with collapse effect */}
       <Collapse in={openAdvanced}>
         <div id="adv-student-attendance">
           <AdvStudentAttendance />
         </div>
       </Collapse>
+      <div className="d-flex justify-content-end" style={{marginTop:"5%"}}>
+        <Button className="btn btn-secondary" onClick={()=>{navigate('/home')}}>Back</Button>
+      </div>
+      
     </div>
+    
   );
 }
 

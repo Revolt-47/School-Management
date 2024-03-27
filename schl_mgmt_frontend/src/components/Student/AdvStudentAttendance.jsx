@@ -25,10 +25,6 @@ function AdvStudentAttendance({ setShowAdvanced }) {
         setEndDate(e.target.value);
     };
 
-    const handleCloseAdvanced = () => {
-        setShowAdvanced(false);
-    };
-
     const handleDeleteChild = async (studentId) => {
         try {
             if(window.confirm("Are you sure you want to delete this student?")) {
@@ -123,8 +119,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
 
     return (
         <div className="container text-center">
-            <h2>Advanced Search</h2>
-            <button className="btn btn-danger" onClick={handleCloseAdvanced} style={{ float: 'right' }}>Close</button>
+            <h2>Attendance Search</h2>
             <div className="row justify-content-center">
                 <div className="col-md-6">
                     <div className="input-group mb-3">
