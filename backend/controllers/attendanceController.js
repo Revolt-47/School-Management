@@ -85,7 +85,8 @@ async function addToQueue(req, res) {
 // Function to check-in a student
 async function checkInStudent(req, res) {
     try {
-
+        console.log("Checking in student")
+        console.log(req.body);
         const { rfidTag, time, date,schoolId} = req.body; // Assuming these fields are sent in the request body
         // Find the student by RFID tag
         const student = await Student.findOne({ rfidTag });

@@ -1,39 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Table, Modal } from 'react-bootstrap';
+import { Button, Table} from 'react-bootstrap';
 import Cookies from 'js-cookie';
 import AddGuardian from '../newGuardian/AddGuardian'; // Import the MainCompGuardian component
-
-// Modal component for displaying student attendance
-// Modal component for displaying student attendance
-const AttendanceModal = ({ show, handleClose, attendance }) => {
-    return (
-        <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Attendance Details</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                {attendance && (
-                    <div>
-                        {attendance.checkIns.length > 0 ? (
-                            <p><strong>Check-In:</strong> {attendance.checkIns[0]}</p>
-                        ) : (
-                            <p><strong>Check-In:</strong> Student didn't check in today.</p>
-                        )}
-                        {attendance.checkOuts.length > 0 ? (
-                            <p><strong>Check-Out:</strong> {attendance.checkOuts[0]}</p>
-                        ) : (
-                            <p><strong>Check-Out:</strong> Student didn't check out today.</p>
-                        )}
-                    </div>
-                )}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Close</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
+import AttendanceModal from './AttendanceModal'; // Import the AttendanceModal component
 
 const StudentList = ({ students, handleEdit }) => {
     const [showGuardianModal, setShowGuardianModal] = useState(false); // State to control the guardian modal visibility
@@ -53,12 +23,13 @@ const StudentList = ({ students, handleEdit }) => {
         relation: '',
         children: []
     });
-
+    const selectedStudent = useRef(null);
     const handleStudentDetails = (student) => {
         navigate(`/studentDetails/${student._id}`);
     }
 
-    const getCheckInOut = async (studentId) => {
+    const getCheckInOut = async (student) => {
+        selectedStudent.current = student;
         try {
             const response = await fetch('http://localhost:3000/attendance/getCheckinCheckout', {
                 method: 'POST',
@@ -67,7 +38,7 @@ const StudentList = ({ students, handleEdit }) => {
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    studentId,
+                    studentId: student._id,
                     date: new Date().toISOString().split('T')[0], // Today's date
                     schoolId,
                 }),
@@ -76,6 +47,7 @@ const StudentList = ({ students, handleEdit }) => {
             // console.log('CheckIns:', checkIns.current);
             // console.log('CheckOuts:', checkOuts.current);
             setAttendance({ checkIns: data.checkIns, checkOuts: data.checkOuts });
+            console.log('Attendance From List:', attendance.checkIns[0]);
             setShowAttendanceModal(true); // Show the attendance modal after fetching data
         } catch (error) {
             console.error('Error fetching attendance:', error);
@@ -129,7 +101,7 @@ const StudentList = ({ students, handleEdit }) => {
                                     <AddGuardian studentId={studentId} showModal={showGuardianModal} setShowModal={setShowGuardianModal} setFormData={setFormData} formData={formData} />
                                 </td>
                                 <td>
-                                    <Button variant="btn btn-primary" onClick={() => getCheckInOut(student._id)}>Attendance</Button>
+                                    <Button variant="btn btn-primary" onClick={() => getCheckInOut(student)}>Attendance</Button>
                                 </td>
                             </tr>
                         ))
@@ -141,7 +113,7 @@ const StudentList = ({ students, handleEdit }) => {
                 </tbody>
             </Table>
             {/* Attendance modal */}
-            <AttendanceModal show={showAttendanceModal} handleClose={() => setShowAttendanceModal(false)} attendance={attendance} />
+            <AttendanceModal show={showAttendanceModal} handleClose={() => setShowAttendanceModal(false)} attendance={attendance} selectedStudent={selectedStudent.current} />
         </>
     );
 };
