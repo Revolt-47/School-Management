@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => {
     const school = JSON.parse(Cookies.get('school'));
     const schoolId = school._id;
-    
+
     const handleManualCheckIn = async () => {
         try {
             console.log(selectedStudent);
@@ -38,7 +38,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
         }
     };
 
-    useEffect(() => {   
+    useEffect(() => {
         console.log("Attendance:", attendance);
     }, [attendance]);
 
@@ -49,7 +49,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             const rfidTag = selectedStudent.rfidTag; // Get RFID tag of selected student
             const time = moment().format('HH:mm:ss'); // Get current time in 'HH:mm:ss' format
             const date = moment().toISOString(); // Get current date in ISO format
-    
+
             // Make API call for manual check-out
             const response = await fetch('http://localhost:3000/attendance/checkout', {
                 method: 'POST',
@@ -59,7 +59,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
                 body: JSON.stringify({ rfidTag, time, date, schoolId }),
             });
             const data = await response.json();
-    
+
             // Handle response accordingly
             if (response.ok) {
                 alert('Manual check-out successful');
@@ -72,7 +72,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             alert('Failed to perform manual check-out');
         }
     };
-    
+
 
     return (
         <Modal show={show} onHide={handleClose}>
@@ -98,17 +98,18 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             <Modal.Footer>
                 <div className="d-flex justify-content-between w-100">
                     <div>
-                        {/* Render the Manual Check-In button only if check-in time is not present */}
-                        {!attendance.checkIns.length > 0 && (
+                        {/* Render the Manual Check-In button only if attendance exists and check-in time is not present */}
+                        {attendance?.checkIns?.length === 0 && (
                             <Button variant="primary" onClick={handleManualCheckIn}>Manual Check-In</Button>
                         )}
-                        {/* Render the Manual Check-Out button only if check-out time is not present */}
-                        {!attendance.checkOuts.length > 0 && (
+                        {/* Render the Manual Check-Out button only if attendance exists and check-out time is not present */}
+                        {attendance?.checkOuts?.length === 0 && (
                             <Button variant="danger" onClick={handleManualCheckOut}>Manual Check-Out</Button>
                         )}
                     </div>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
                 </div>
+
             </Modal.Footer>
         </Modal>
     );
