@@ -80,7 +80,7 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
                 <Modal.Title>Attendance Details</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-            {attendance && (
+                {attendance && (
                     <div>
                         {attendance.checkIns.length > 0 ? (
                             <p><strong>Check-In:</strong> {moment(attendance.checkIns[0].time, 'HH:mm:ss').format('hh:mm A')}</p>
@@ -98,8 +98,14 @@ const AttendanceModal = ({ show, handleClose, attendance, selectedStudent }) => 
             <Modal.Footer>
                 <div className="d-flex justify-content-between w-100">
                     <div>
-                        <Button variant="primary" onClick={handleManualCheckIn}>Manual Check-In</Button>
-                        <Button variant="danger" onClick={handleManualCheckOut}>Manual Check-Out</Button>
+                        {/* Render the Manual Check-In button only if check-in time is not present */}
+                        {!attendance.checkIns.length > 0 && (
+                            <Button variant="primary" onClick={handleManualCheckIn}>Manual Check-In</Button>
+                        )}
+                        {/* Render the Manual Check-Out button only if check-out time is not present */}
+                        {!attendance.checkOuts.length > 0 && (
+                            <Button variant="danger" onClick={handleManualCheckOut}>Manual Check-Out</Button>
+                        )}
                     </div>
                     <Button variant="secondary" onClick={handleClose}>Close</Button>
                 </div>
