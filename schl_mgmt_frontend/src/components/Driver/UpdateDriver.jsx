@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const UpdateDriver = () => {
   const { driverId } = useParams();
@@ -70,7 +71,10 @@ const UpdateDriver = () => {
       <Row className="justify-content-center">
         <Col md={8}>
           <div className="bg-light p-4 rounded">
-            <h2 className="mb-4">Update Driver Information</h2>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+              <ArrowBackIcon onClick={() => navigate('/home')} style={{ cursor: 'pointer', marginBottom:"2%" }} />
+              <h2 className="mb-4" style={{ marginLeft: '10px' }}>Update Driver Information</h2>
+            </div>
             {driverDetails && (
               <div className="mb-4">
                 <p><strong>Current Contact Number:</strong> {driverDetails.contactNumber}</p>
@@ -104,7 +108,6 @@ const UpdateDriver = () => {
           </div>
         </Col>
       </Row>
-      <Button variant="primary" onClick={() => navigate('/home')}>Back</Button>
     </Container>
   );
 };

@@ -96,6 +96,10 @@ const Driver = () => {
 
   return (
     <Container className="mt-5" style={{ height: '100vh', overflowY: 'auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontFamily: 'Arial, sans-serif', fontSize: '3em', fontWeight: 'bold', color: '#333' }}>Driver Management Module</h1>
+        <p style={{ fontSize: '1.2em', color: '#666' }}>Easily manage your drivers</p>
+      </div>
       <Form.Control
         type="text"
         placeholder="Search driver by any credential"
@@ -106,7 +110,7 @@ const Driver = () => {
           display: 'block',
           margin: '0 auto',
           position: 'sticky',
-          top: 70,
+          top: 90,
           zIndex: 1000,
           border: 'none',
           borderRadius: '15px',
@@ -114,7 +118,7 @@ const Driver = () => {
           backgroundColor: '#f5f5f5',
         }}
       />
-      <Row style={{ marginTop: "100px" }}>
+      <Row style={{ marginTop: "60px" }}>
         <Col>
           <Button variant="primary" onClick={handleAdd}>
             Add New Driver

@@ -27,17 +27,36 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
 
     const handleFormChange = (e) => {
         const { name, value } = e.target;
+        
         // Check if the input is CNIC
         if (name === 'cnic') {
-            const cnicRegex = /^[0-9-]*$/;
-            if (!cnicRegex.test(value)) {
-                setCnicError('CNIC can only contain numbers and dashes');
-            } else {
-                setCnicError('');
+            // Remove non-digit characters from input value
+            const strippedValue = value.replace(/\D/g, '');
+            
+            // Format CNIC as per pattern
+            let formattedCnic = '';
+            for (let i = 0; i < strippedValue.length; i++) {
+                if (i === 5 || i === 12) {
+                    formattedCnic += '-';
+                }
+                formattedCnic += strippedValue[i];
             }
+    
+            if (strippedValue.length <= 13) {
+                setFormData((prevData) => ({ ...prevData, [name]: formattedCnic }));
+                if (strippedValue.length === 13) {
+                    setCnicError('');
+                } else {
+                    setCnicError('CNIC must be 13 digits long');
+                }
+            }
+        } else {
+            // For other form fields, just set the value
+            setFormData((prevData) => ({ ...prevData, [name]: value }));
         }
-        setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
+    
+    
 
     const handleEmailBlur = (event) => {
         const { value } = event.target;

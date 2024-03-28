@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Collapse, Button } from "react-bootstrap";
 import AdvStudentAttendance from "./AdvStudentAttendance";
 import Cookies from "js-cookie";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function StudentDetails() {
   const [openAdvanced, setOpenAdvanced] = useState(false);
@@ -54,9 +55,12 @@ function StudentDetails() {
 
   return (
     <div>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+        <ArrowBackIcon onClick={() => navigate('/home')} style={{ cursor: 'pointer' }} />
+        <h2 style={{ marginLeft: '10px' }}>Student Details</h2>
+      </div>
       {student ? (
         <div>
-          <h2>Student Details</h2>
           <table style={tableStyle}>
             <tbody>
               <tr>
@@ -99,10 +103,6 @@ function StudentDetails() {
           <AdvStudentAttendance />
         </div>
       </Collapse>
-      <div className="d-flex justify-content-end" style={{marginTop:"5%"}}>
-        <Button className="btn btn-secondary" onClick={()=>{navigate('/home')}}>Back</Button>
-      </div>
-      
     </div>
     
   );

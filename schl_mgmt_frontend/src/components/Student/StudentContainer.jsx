@@ -162,31 +162,31 @@ const StudentContainer = () => {
   
   return (
     <Container className="mt-5" style={{ height: '100vh', overflowY: 'auto' }}>
-  <Form.Control
-    type="text"
-    placeholder="Search student by any credential"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    style={{
-      width: '50%',
-      display: 'block',
-      margin: '0 auto',
-      position: 'sticky',
-      top: 70,
-      zIndex: 1000,
-      border: 'none',
-      borderRadius: '15px',
-      boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
-      backgroundColor: '#f5f5f5',
-    }}
-  />
-      <Row style={{marginTop:"100px"}}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h1 style={{ fontFamily: 'Arial, sans-serif', fontSize: '3em', fontWeight: 'bold', color: '#333' }}>Student Management Module</h1>
+        <p style={{ fontSize: '1.2em', color: '#666' }}>Manage your students with ease</p>
+      </div>
+      <Form.Control
+        type="text"
+        placeholder="Search student by any credential"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          width: '50%',
+          display: 'block',
+          margin: '0 auto',
+          position: 'sticky',
+          top: 90,
+          zIndex: 1000,
+          border: 'none',
+          borderRadius: '15px',
+          boxShadow: '0 0 10px 3px rgba(0,0,0,0.2)',
+          backgroundColor: '#f5f5f5',
+        }}
+      />
+      <Row style={{ marginTop: "60px" }}>
         <Col>
-          <Button variant="primary" onClick={() => {
-            
-            setShowModal(true)
-          }
-            }>
+          <Button variant="primary" onClick={() => setShowModal(true)}>
             Add Student
           </Button>
         </Col>
@@ -210,5 +210,6 @@ const StudentContainer = () => {
     </Container>
   );
 };
+
 
 export default StudentContainer;
