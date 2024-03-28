@@ -70,7 +70,7 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
         try {
             // an object named as child that contains stundet id and student relation
             const child = {
-                childId: studentId.current,
+                child: studentId.current,
                 relation: formData.relation
             };
             const children = [child];
@@ -88,7 +88,7 @@ const AddGuardian = ({ showModal, setShowModal, setFormData, formData, studentId
             }).then(
                     (response) => {
                         console.log('Response:', response);
-                        if (response.status !== 200) {
+                        if (response.status >= 400) {
                             if(response.status === 400)
                                 setError(response.error);
                             throw new Error(response.error);

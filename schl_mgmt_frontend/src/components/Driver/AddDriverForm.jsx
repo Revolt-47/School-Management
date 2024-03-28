@@ -54,7 +54,7 @@ const AddDriverForm = () => {
                     alert('Vehicles added to an existing driver.');
                 else
                 alert('Driver added successfully!');
-                navigate('/');
+                navigate('/home');
             }
             else {
                 if(data.code === 11000)

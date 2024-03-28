@@ -122,7 +122,7 @@ async function checkInStudent(req, res) {
         let existingCheckIn = await CheckIn.findOne({ student: student._id, date: specificDate });
         if (existingCheckIn) {
             // Update the existing check-in entry
-            res.status(489).json("Child already checked in for today")
+            return res.status(489).json("Child already checked in for today")
         } else {
             // Create a new check-in entry
             existingCheckIn = new CheckIn({
@@ -138,7 +138,7 @@ async function checkInStudent(req, res) {
         let attendance = await Attendance.findOne({ student_id: student._id, date: specificDate });
         if (attendance) {
             // Update the existing attendance record
-            res.status(489).json("Child already checked in for today")
+            return res.status(489).json("Child already checked in for today")
 
         } else {
             // Create a new attendance record

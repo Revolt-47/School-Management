@@ -93,7 +93,9 @@ function AdvStudentAttendance({ setShowAdvanced }) {
                 body: JSON.stringify({
                     studentId,
                     date,
-                    schoolId
+                    schoolId,
+                    role:"",
+                    pickupPerson:""
                 }),
             });
             if (!response.ok) {
@@ -105,7 +107,7 @@ function AdvStudentAttendance({ setShowAdvanced }) {
             // Convert check-in and check-out times to 12-hour format
             const checkInTime = moment(data.checkIns[0]?.time, 'HH:mm:ss').format('hh:mm A');
             const checkOutTime = moment(data.checkOuts[0]?.time, 'HH:mm:ss').format('hh:mm A');
-    
+            console.log("Check out object:", data.checkOuts[0]);
             // Update the attendanceData state with check-in and check-out data for the specific row
             setAttendanceData(prevAttendanceData => {
                 const newData = [...prevAttendanceData];

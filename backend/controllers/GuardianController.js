@@ -38,7 +38,7 @@ const createGuardianAccount = async (req, res) => {
           }
 
           // Check if the child exists in the system
-          const existingChild = await Student.findById(childId);
+          const existingChild = await Student.findById(child.child);
           if (!existingChild) {
             return res.status(400).json({ error: 'Child does not exist in the system.' });
           }

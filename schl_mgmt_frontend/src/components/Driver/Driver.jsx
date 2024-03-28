@@ -56,25 +56,27 @@ const Driver = () => {
 
 
   const handleDelete = async (driverId) => {
-    try {
-      const response = await fetch('http://localhost:3000/driver', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ driverId, schoolId }),
-      });
-      if (response.ok) {
-        fetchDrivers(); // Refresh the drivers list after deletion
-        alert('Driver deleted successfully!');
-      } else {
-        const data = await response.json();
-        alert(data.error || 'Failed to delete driver');
+    if (window.confirm('Are you sure you want to delete this driver?')) {
+      try {
+        const response = await fetch('http://localhost:3000/driver', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ driverId, schoolId }),
+        });
+        if (response.ok) {
+          fetchDrivers(); // Refresh the drivers list after deletion
+          alert('Driver deleted successfully!');
+        } else {
+          const data = await response.json();
+          alert(data.error || 'Failed to delete driver');
+        }
+      } catch (error) {
+        console.error('Error deleting driver:', error);
+        alert('Failed to delete driver');
       }
-    } catch (error) {
-      console.error('Error deleting driver:', error);
-      alert('Failed to delete driver');
     }
   };
 
